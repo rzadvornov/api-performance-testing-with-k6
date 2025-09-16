@@ -84,7 +84,7 @@ export async function exponentialBackoff<T>(
       if (retries >= maxRetries) {
         throw error;
       }
-      await sleep(delay / 1000); // Convert ms to seconds for k6 sleep
+      await sleep(delay / 1000);
       delay *= 2;
     }
   }
@@ -106,7 +106,7 @@ export function weightedRandom<T extends { weight: number }>(items: T[]): T {
   return items[items.length - 1]; // Fallback
 }
 
-export function executeWithProbability(probability, callback) {
+export function executeWithProbability(probability: number, callback: () => void): boolean {
   if (Math.random() < probability) {
     callback();
     return true;

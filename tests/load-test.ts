@@ -7,11 +7,11 @@ import {
   getRandomElement,
   weightedRandom,
   executeWithProbability,
+  handleError,
 } from "../utilities/utils";
 
 export let options = loadTestOptions;
 
-// Custom metrics for comprehensive monitoring
 export const scenarioCounter = new Counter("scenario_executions");
 export const scenarioErrorRate = new Rate("scenario_errors");
 export const scenarioDuration = new Trend("scenario_duration_ms");
@@ -20,43 +20,36 @@ export const failedOperations = new Counter("failed_operations");
 
 const api = new FakeStoreAPI();
 
-// Scenario configuration with weights and metadata
-const SCENARIOS = [
+const JOURNEY_STEPS = [
   {
-    name: "browseCatalog",
+    name: "Browse Product Catalog",
     weight: 30,
     function: browseCatalog,
-    description: "General product browsing and discovery",
   },
   {
-    name: "viewProductDetails",
+    name: "View Product Details",
     weight: 25,
     function: viewProductDetails,
-    description: "Product detail viewing and comparison",
   },
   {
-    name: "searchByCategory",
+    name: "Category Based Search",
     weight: 20,
     function: searchByCategory,
-    description: "Category-based product exploration",
   },
   {
-    name: "manageUserProfile",
+    name: "User Profile Management",
     weight: 10,
     function: manageUserProfile,
-    description: "User profile management operations",
   },
   {
-    name: "handleShoppingCart",
+    name: "Shopping Cart Interactions",
     weight: 10,
     function: handleShoppingCart,
-    description: "Shopping cart interactions",
   },
   {
-    name: "performAuthentication",
+    name: "User Authentication Flows",
     weight: 5,
     function: performAuthentication,
-    description: "User authentication flows",
   },
 ];
 
@@ -75,7 +68,7 @@ export default function () {
 }
 
 function executeRandomScenario(): string {
-  const selectedScenario = weightedRandom(SCENARIOS);
+  const selectedScenario = weightedRandom(JOURNEY_STEPS);
 
   try {
     selectedScenario.function();
@@ -83,13 +76,12 @@ function executeRandomScenario(): string {
     return selectedScenario.name;
   } catch (error) {
     scenarioErrorRate.add(1, { scenario: selectedScenario.name });
-    console.error(`Scenario ${selectedScenario.name} failed: ${error.message}`);
+    handleError(`Scenario ${selectedScenario.name} failed: `, error);
     return `${selectedScenario.name}_failed`;
   }
 }
 
 function browseCatalog() {
-  // Main browsing operation
   api.products.getAllProducts();
   successfulOperations.add(1);
 
@@ -179,7 +171,6 @@ function handleShoppingCart() {
 }
 
 async function performAuthentication() {
-  // Simulate different user credentials for more realistic load
   const credentials = {
     username: TEST_DATA.CREDENTIALS.username,
     password: TEST_DATA.CREDENTIALS.password,

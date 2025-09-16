@@ -12,13 +12,13 @@ import {
   getRandomCart,
   getRandomProduct,
   executeWithProbability,
+  handleError,
 } from "../utilities/utils";
 
 export let options = stressTestOptions;
 
 const api = new FakeStoreAPI();
 
-// Scenario handlers
 const scenarioHandlers = [
   {
     threshold: STRESS_SCENARIO_THRESHOLDS.INTENSIVE_PRODUCT,
@@ -49,7 +49,7 @@ export default function () {
     try {
       handler.handler();
     } catch (error) {
-      console.error(`Scenario ${handler.handler.name} failed:`, error.message);
+      handleError(`Scenario ${handler.handler.name} failed: `, error);
     }
   }
 
@@ -57,10 +57,8 @@ export default function () {
 }
 
 function intensiveProductOperations() {
-  // Rapid product browsing
   api.products.getAllProducts();
 
-  // View multiple products rapidly
   const productViews = getRandomInt(
     STRESS_OPERATION_RANGES.PRODUCT_BROWSING.MIN,
     STRESS_OPERATION_RANGES.PRODUCT_BROWSING.MAX
@@ -74,7 +72,6 @@ function intensiveProductOperations() {
     );
   }
 
-  // Category searches with probability
   TEST_DATA.CATEGORIES.forEach((category) => {
     executeWithProbability(0.5, () => {
       api.products.getProductsByCategory(category);
@@ -83,10 +80,8 @@ function intensiveProductOperations() {
 }
 
 function heavyUserOperations() {
-  // Simulate admin viewing users
   api.users.getAllUsers();
 
-  // View random users in batch
   const userCount = getRandomInt(
     STRESS_OPERATION_RANGES.USER_BATCH.MIN,
     STRESS_OPERATION_RANGES.USER_BATCH.MAX
@@ -106,15 +101,13 @@ function heavyUserOperations() {
 }
 
 function aggressiveCartOperations() {
-  // Heavy cart operations
   api.carts.getAllCarts();
 
-  // Multiple user cart checks
   for (let userId = 1; userId <= 5; userId++) {
     try {
       api.carts.getUserCarts(userId);
     } catch (error) {
-      console.error(`Cart operation failed for user ${userId}:`, error.message);
+      handleError(`Cart operation failed for user ${userId}: `, error);
     }
   }
 
@@ -152,7 +145,6 @@ function mixedCRUDOperations() {
       ),
   ];
 
-  // Execute multiple random operations with error handling
   const operationCount = getRandomInt(
     STRESS_OPERATION_RANGES.MIXED_OPS.MIN,
     STRESS_OPERATION_RANGES.MIXED_OPS.MAX
@@ -162,14 +154,13 @@ function mixedCRUDOperations() {
     try {
       operation();
     } catch (error) {
-      console.error("Mixed CRUD operation failed:", error.message);
+      handleError("Mixed CRUD operation failed: ", error);
     }
   }
 }
 
 function batchOperations() {
   try {
-    // High-volume batch operations
     const productIds = Array.from({ length: 10 }, () =>
       getRandomInt(
         STRESS_OPERATION_RANGES.PRODUCT.MIN,
@@ -194,6 +185,6 @@ function batchOperations() {
     );
     api.carts.batchGetCarts(cartIds);
   } catch (error) {
-    console.error("Batch operations failed:", error.message);
+    handleError("Batch operations failed: ", error);
   }
 }

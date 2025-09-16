@@ -11,7 +11,6 @@ import {
 
 export let options = enduranceTestOptions;
 
-// Custom metrics for better monitoring
 export const successfulOperations = new Counter("successful_operations");
 export const failedOperations = new Counter("failed_operations");
 export const operationErrorRate = new Rate("operation_error_rate");
@@ -57,7 +56,6 @@ export default function () {
 }
 
 async function lightBrowsing(_iteration: number) {
-  // Light operations with variety
   const operations = [
     () =>
       api.products.getProduct(
@@ -76,7 +74,6 @@ async function lightBrowsing(_iteration: number) {
 }
 
 async function heavyBrowsing(_iteration: number) {
-  // Heavy operations that stress the system
   const operations = [
     () => api.products.getAllProducts(),
     () => api.products.getProductCategories(),
@@ -98,7 +95,6 @@ async function heavyBrowsing(_iteration: number) {
 }
 
 async function moderateBrowsing(_iteration: number) {
-  // Moderate operations with some data retrieval
   const operations = [
     () => api.products.getAllProducts(),
     () =>
@@ -130,7 +126,6 @@ const executeRandomOperations = async ({
     try {
       const operation = getRandomElement(operations);
 
-      // Use the exponentialBackoff function with retry tracking
       let retryCount = 0;
       await exponentialBackoff(
         async () => {
@@ -152,7 +147,7 @@ const executeRandomOperations = async ({
       results.push({
         success: false,
         error: error as Error,
-        retries: maxRetries, // Since all retries were exhausted
+        retries: maxRetries,
       });
     }
   }

@@ -12,10 +12,6 @@ export let options = volumeTestOptions;
 
 const api = new FakeStoreAPI();
 
-/**
- * Defines the user journey steps with their execution probabilities.
- * A higher weight indicates a higher chance of being executed in each iteration.
- */
 const JOURNEY_STEPS = [
   { weight: 0.9, execute: browseCategory, name: "Browse Category" },
   { weight: 0.8, execute: viewProductDetails, name: "View Product Details" },
@@ -46,11 +42,9 @@ export default function () {
 }
 
 function simulateRealisticUserJourney() {
-  // 1. Landing page (always happens)
   api.products.getAllProducts();
   api.products.getProductCategories();
 
-  // 2. Execute weighted random journey steps
   JOURNEY_STEPS.forEach(({ weight, execute }) => {
     executeWithProbability(weight, execute);
   });
@@ -106,7 +100,6 @@ function viewLimitedProducts() {
   api.products.getLimitedProducts(limit);
 }
 
-// Additional realistic actions using available endpoints
 function viewAllCarts() {
   api.carts.getAllCarts();
 }
