@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: Compile TypeScript tests
-        run: npm run build # Assuming you have a build script in your package.json
+        run: npm run build
 
       - name: Run k6 tests with Docker
         run: |
