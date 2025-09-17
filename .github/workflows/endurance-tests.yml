@@ -1,0 +1,32 @@
+name: K6 Endurance Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  endurance-tests:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compile TypeScript tests
+        run: npm run build # Assuming you have a build script in your package.json
+
+      - name: Run k6 tests with Docker
+        run: |
+          docker run --rm -i -v $(pwd):/app grafana/k6 run --out influxdb=http://your-influxdb-host:8086/k6-db /app/dist/endurance-test.js
