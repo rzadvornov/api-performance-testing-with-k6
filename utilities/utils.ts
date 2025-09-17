@@ -2,6 +2,7 @@ import { Product } from "../api/types/product";
 import { User } from "../api/types/user";
 import { Cart } from "../api/types/cart";
 import { sleep } from "k6";
+import { TEST_DATA } from "../config";
 
 export function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -16,12 +17,7 @@ export function getRandomProduct(): Product {
     title: `Performance Test Product ${getRandomInt(1, 10000)}`,
     price: Math.round((Math.random() * 1000 + 10) * 100) / 100,
     description: "This is a performance test product",
-    category: getRandomElement([
-      "electronics",
-      "jewelery",
-      "men's clothing",
-      "women's clothing",
-    ]),
+    category: getRandomElement(TEST_DATA.CATEGORIES),
     image: "https://via.placeholder.com/640x480.png/09f/fff",
   };
 }

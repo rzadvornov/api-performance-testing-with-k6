@@ -195,6 +195,14 @@ export abstract class BaseAPI {
         r.status === expectedStatus,
       [`${endpoint} - response time < 500ms`]: (r) => r.timings.duration < 500,
       [`${endpoint} - response has body`]: (r) => r.body && r.body.length > 0,
+      "response body is valid JSON": (r) => {
+        try {
+          JSON.parse(r.body);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
     });
 
     console.log(
