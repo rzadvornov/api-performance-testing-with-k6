@@ -1,7 +1,13 @@
 import { sleep } from "k6";
 import { Counter, Rate } from "k6/metrics";
+
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
-import { enduranceTestOptions, BROWSE_PHASES, ID_RANGES, SLEEP_RANGE } from "../config";
+import {
+  enduranceTestOptions,
+  BROWSE_PHASES,
+  ID_RANGES,
+  SLEEP_RANGE,
+} from "../config";
 import {
   getRandomInt,
   getRandomElement,
@@ -9,6 +15,7 @@ import {
   handleError,
 } from "../utilities/utils";
 
+export { handleSummary } from '../reporter/k6-summary';
 export let options = enduranceTestOptions;
 
 export const successfulOperations = new Counter("successful_operations");

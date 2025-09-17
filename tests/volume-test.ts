@@ -7,6 +7,7 @@ import {
   executeWithProbability,
   handleError,
 } from "../utilities/utils";
+export { handleSummary } from '../reporter/k6-summary';
 
 export let options = volumeTestOptions;
 

@@ -3,6 +3,7 @@ import { getRandomInt, executeWithProbability, handleError } from "../utilities/
 import { spikeTestOptions, SPIKE_PRODUCT_RANGES, SPIKE_BEHAVIOR_THRESHOLDS, TEST_DATA } from "../config";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
 
+export { handleSummary } from '../reporter/k6-summary';
 export let options = spikeTestOptions;
 
 const api = new FakeStoreAPI();

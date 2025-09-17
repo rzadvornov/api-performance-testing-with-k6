@@ -3,11 +3,11 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   entry: {
-    'endurance-test': './tests/endurance-test.ts',
-    'load-test': './tests/load-test.ts',
-    'spike-test': './tests/spike-test.ts',
-    'stress-test': './tests/stress-test.ts',
     'volume-test': './tests/volume-test.ts',
+    'stress-test': './tests/stress-test.ts',
+    'spike-test': './tests/spike-test.ts',
+    'load-test': './tests/load-test.ts',
+    'endurance-test': './tests/endurance-test.ts',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -19,12 +19,13 @@ module.exports = {
       {
         test: /\.ts$/,
         use: 'ts-loader',
+        exclude: /node_modules/,
       },
     ],
   },
   resolve: {
     extensions: ['.ts', '.js'],
   },
-  target: 'web',
+  target: 'node',
   externals: [/^k6(\/.*)?/],
 };

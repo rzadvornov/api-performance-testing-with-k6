@@ -10,6 +10,7 @@ import {
   handleError,
 } from "../utilities/utils";
 
+export { handleSummary } from '../reporter/k6-summary';
 export let options = loadTestOptions;
 
 export const scenarioCounter = new Counter("scenario_executions");
