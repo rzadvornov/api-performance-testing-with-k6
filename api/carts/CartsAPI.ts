@@ -1,4 +1,4 @@
-import HTTPMethod from "http-method-enum";
+import { HTTPMethod } from "http-method-enum";
 import { BaseAPI } from "../BaseAPI";
 import { Cart } from "../types/cart";
 

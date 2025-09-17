@@ -1,9 +1,9 @@
 import http, { ResponseType, RefinedParams } from "k6/http";
 import { baseUrl } from "../config";
-import StatusCode from "status-code-enum";
+import { StatusCode } from "status-code-enum";
 import { check } from "k6";
 import { Counter, Rate, Trend } from "k6/metrics";
-import HTTPMethod from "http-method-enum";
+import { HTTPMethod } from "http-method-enum";
 
 /**
  * Total count of API calls made, categorized by endpoint
