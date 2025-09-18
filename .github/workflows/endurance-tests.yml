@@ -30,3 +30,39 @@ jobs:
       - name: Run k6 tests with Docker
         run: |
           docker run --rm -i -v $(pwd):/app grafana/k6 run --out influxdb=http://your-influxdb-host:8086/k6-db /app/dist/endurance-test.js
+      
+      - name: Generate report
+        run: node reporter/generate-report.ts
+
+      - name: Upload report as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-report
+          path: html-report/report.html
+
+  publish-report:
+    runs-on: ubuntu-latest
+    needs: endurance-tests
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: k6-report
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload report to GitHub Pages
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: your-report-output-directory/
+      
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4          
