@@ -1,12 +1,9 @@
 name: K6 Load Tests
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  schedule:
+    # Run at 8:30 UTC every day
+    - cron: "30 8 * * *"
 
 jobs:
   load-tests:

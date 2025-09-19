@@ -1,12 +1,9 @@
 name: K6 Stress Tests
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  schedule:
+    # Run at 3:30 UTC every day
+    - cron: "30 3 * * *"
 
 jobs:
   stress-tests:
