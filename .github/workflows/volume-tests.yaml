@@ -34,7 +34,7 @@ jobs:
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
           docker run --rm -v $(pwd):/app grafana/k6 run \
-            --out "influxdb=$INFLUXDB_URL?org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET&token=$INFLUXDB_TOKEN" \
+            --out "cloud=$INFLUXDB_URL?org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET&token=$INFLUXDB_TOKEN" \
             /app/dist/volume-test.js
 
       - name: Generate report
