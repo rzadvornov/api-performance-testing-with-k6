@@ -37,16 +37,14 @@ jobs:
           xk6 build --with github.com/grafana/xk6-output-influxdb@latest
           sudo mv k6 /usr/local/bin/
 
-      - name: Run k6 tests with custom binary
+      - name: Run k6 tests with environment variables
         env:
-          INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
-          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
-          INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
-          INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
+          K6_INFLUXDB_SERVER: ${{ secrets.INFLUXDB_URL }}
+          K6_INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+          K6_INFLUXDB_ORGANIZATION: ${{ secrets.INFLUXDB_ORG }}
+          K6_INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
-          k6 run \
-            --out xk6-influxdb="url=$INFLUXDB_URL,token=$INFLUXDB_TOKEN,org=$INFLUXDB_ORG,bucket=$INFLUXDB_BUCKET" \
-            dist/volume-test.js
+          k6 run --out xk6-influxdb dist/volume-test.js
 
       - name: Generate report
         if: always()
