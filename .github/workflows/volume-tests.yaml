@@ -32,8 +32,7 @@ jobs:
           INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
           INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
-        run: |
-          docker run --rm -i -v $(pwd):/app grafana/k6 run --out influxdbv2=$INFLUXDB_URL?org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET&token=$INFLUXDB_TOKEN -- /app/dist/volume-test.js
+        run: docker run --rm -i -v $(pwd):/app grafana/k6 run --out influxdbv2=$INFLUXDB_URL?org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET&token=$INFLUXDB_TOKEN -- /app/dist/volume-test.js
 
       - name: Generate report
         run: node reporter/generate-report.ts
