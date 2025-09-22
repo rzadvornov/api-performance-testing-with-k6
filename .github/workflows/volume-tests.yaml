@@ -1,9 +1,10 @@
 name: K6 Volume Tests
 
 on:
-  schedule:
-    # Run at 11:30 UTC every day
-    - cron: "30 11 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   volume-tests:
@@ -16,13 +17,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install
 
       - name: Compile TypeScript tests
         run: npm run build
+      - name: Check file path
+        run: ls -l dist
 
       - name: Run k6 tests with Docker
         env:
@@ -32,7 +35,7 @@ jobs:
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
           docker run --rm -i -v $(pwd):/app grafana/k6 run --out influxdbv2=$INFLUXDB_URL?org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET&token=$INFLUXDB_TOKEN /app/dist/volume-test.js
-      
+
       - name: Generate report
         run: node reporter/generate-report.ts
 
@@ -65,6 +68,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: your-report-output-directory/
-      
+
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4   
+        uses: actions/deploy-pages@v4
