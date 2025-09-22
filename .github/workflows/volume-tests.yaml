@@ -29,11 +29,16 @@ jobs:
       - name: Compile TypeScript tests
         run: npm run build
 
-      - name: Run k6 tests with cloud output
+      - name: Run k6 tests with InfluxDB v2
         env:
-          K6_CLOUD_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+          INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
+          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+          INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
+          INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
-          k6 run --out cloud dist/volume-test.js
+          k6 run \
+            --out "influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" \
+            dist/volume-test.js
 
       - name: Generate report
         if: always()
