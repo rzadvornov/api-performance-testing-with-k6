@@ -37,7 +37,7 @@ jobs:
           xk6 build --with github.com/grafana/xk6-output-influxdb@latest
           sudo mv k6 /usr/local/bin/
 
-      - name: Run k6 with correct v2 parameters
+      - name: Run k6 with corrected parameter names
         env:
           INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
           INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
           k6 run \
-            --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" \
+            --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" \
             dist/volume-test.js
 
       - name: Generate report
