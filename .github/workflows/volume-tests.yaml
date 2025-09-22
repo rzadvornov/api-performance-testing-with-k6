@@ -24,42 +24,11 @@ jobs:
       - name: Compile TypeScript tests
         run: npm run build
 
-      - name: Set up Go for xk6
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-
-      - name: Install xk6
-        run: go install go.k6.io/xk6/cmd/xk6@latest
-
-      - name: Build custom k6 with InfluxDB v2 support
-        run: |
-          xk6 build --with github.com/grafana/xk6-output-influxdb@latest
-          sudo mv k6 /usr/local/bin/
-
-      - name: Run k6 with corrected parameter names
+      - name: Run k6 tests with cloud output
         env:
-          INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
-          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
-          INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
-          INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
+          K6_CLOUD_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
         run: |
-          echo "Testing required parameters..."
-          
-          # Test 1: Just URL and token
-          echo "Test 1: URL + token only"
-          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN" dist/volume-test.js || true
-          
-          # Test 2: Add organization
-          echo "Test 2: URL + token + organization"
-          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG" dist/volume-test.js || true
-          
-          # Test 3: Add bucket with different names
-          echo "Test 3: URL + token + organization + bucket (as 'bucket')"
-          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" dist/volume-test.js || true
-          
-          echo "Test 4: URL + token + organization + bucket (as 'db')"
-          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG&db=$INFLUXDB_BUCKET" dist/volume-test.js || true
+          k6 run --out cloud dist/volume-test.js
 
       - name: Generate report
         if: always()
