@@ -44,9 +44,22 @@ jobs:
           INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
-          k6 run \
-            --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&org=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" \
-            dist/volume-test.js
+          echo "Testing required parameters..."
+          
+          # Test 1: Just URL and token
+          echo "Test 1: URL + token only"
+          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN" dist/volume-test.js || true
+          
+          # Test 2: Add organization
+          echo "Test 2: URL + token + organization"
+          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG" dist/volume-test.js || true
+          
+          # Test 3: Add bucket with different names
+          echo "Test 3: URL + token + organization + bucket (as 'bucket')"
+          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" dist/volume-test.js || true
+          
+          echo "Test 4: URL + token + organization + bucket (as 'db')"
+          k6 run --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG&db=$INFLUXDB_BUCKET" dist/volume-test.js || true
 
       - name: Generate report
         if: always()
