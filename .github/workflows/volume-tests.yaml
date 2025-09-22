@@ -29,17 +29,23 @@ jobs:
       - name: Compile TypeScript tests
         run: npm run build
 
-      - name: Run k6 tests with InfluxDB v2
+      - name: Run k6 tests with InfluxDB v2 and Proxy
+        # Add the proxy environment variables here
         env:
           INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
           INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
           INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
+          # Use a public proxy here. Replace the example IP and port with a fresh one.
+          # The same variable is used for both HTTP and HTTPS.
+          PROXY_URL: 'http://104.225.228.14:8080'
         run: |
             docker run --rm -v $(pwd):/app \
             -e K6_INFLUXDB_ORGANIZATION=$INFLUXDB_ORG \
             -e K6_INFLUXDB_TOKEN=$INFLUXDB_TOKEN \
             -e K6_INFLUXDB_BUCKET=$INFLUXDB_BUCKET \
+            -e HTTP_PROXY=$PROXY_URL \
+            -e HTTPS_PROXY=$PROXY_URL \
             grafana/k6 run \
             --out influxdb=$INFLUXDB_URL \
             /app/dist/volume-test.js
