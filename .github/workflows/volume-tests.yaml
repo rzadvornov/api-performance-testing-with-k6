@@ -23,8 +23,6 @@ jobs:
 
       - name: Compile TypeScript tests
         run: npm run build
-      - name: Check file path
-        run: ls -l dist
 
       - name: Run k6 tests with Docker
         env:
@@ -42,6 +40,7 @@ jobs:
             /app/dist/volume-test.js
 
       - name: Generate report
+        if: always()
         run: node reporter/generate-report.ts
 
       - name: Upload report as an artifact
