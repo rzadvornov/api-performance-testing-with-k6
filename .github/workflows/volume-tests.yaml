@@ -37,27 +37,15 @@ jobs:
           xk6 build --with github.com/grafana/xk6-output-influxdb@latest
           sudo mv k6 /usr/local/bin/
 
-      - name: Debug and run k6 tests
+      - name: Run k6 with correct v2 parameters
         env:
           INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
           INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
           INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
         run: |
-          # Debug: show what we're working with
-          echo "URL: ${INFLUXDB_URL:0:20}..."  # Show first 20 chars
-          echo "Token: ${INFLUXDB_TOKEN:0:10}..."  # Show first 10 chars
-          echo "Org: $INFLUXDB_ORG"
-          echo "Bucket: $INFLUXDB_BUCKET"
-          
-          # Ensure URL has https:// prefix if missing
-          if [[ ! "$INFLUXDB_URL" =~ ^https?:// ]]; then
-            INFLUXDB_URL="https://$INFLUXDB_URL"
-          fi
-          
-          # Try the most common parameter format
           k6 run \
-            --out "xk6-influxdb=server=$INFLUXDB_URL,token=$INFLUXDB_TOKEN,org=$INFLUXDB_ORG,bucket=$INFLUXDB_BUCKET" \
+            --out "xk6-influxdb=$INFLUXDB_URL?token=$INFLUXDB_TOKEN&organization=$INFLUXDB_ORG&bucket=$INFLUXDB_BUCKET" \
             dist/volume-test.js
 
       - name: Generate report
