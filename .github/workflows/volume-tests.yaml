@@ -27,6 +27,9 @@ jobs:
       - name: Compile TypeScript tests
         run: npm run build
 
+      - name: See what is returned from Github Actions  
+        run: curl -v https://fakestoreapi.com/products
+
       - name: Run k6 tests with InfluxDB v2
         env:
           INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
