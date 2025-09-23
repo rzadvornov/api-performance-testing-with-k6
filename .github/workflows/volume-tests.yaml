@@ -33,15 +33,12 @@ jobs:
           INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
           INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
           INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
-          PROXY_URL: 'http://104.225.228.14:8080'
         run: |
-            # Use the custom image you just built
+            # Use the custom just built image
             docker run --rm -v $(pwd):/app \
             -e K6_INFLUXDB_ORGANIZATION=$INFLUXDB_ORG \
             -e K6_INFLUXDB_TOKEN=$INFLUXDB_TOKEN \
             -e K6_INFLUXDB_BUCKET=$INFLUXDB_BUCKET \
-            -e HTTP_PROXY=$PROXY_URL \
-            -e HTTPS_PROXY=$PROXY_URL \
             custom-k6-influxdb-v2:latest run \
             --out xk6-influxdb=$INFLUXDB_URL \
             /app/dist/volume-test.js

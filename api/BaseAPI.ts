@@ -30,6 +30,8 @@ export const customResponseTime = new Trend("custom_response_time");
 export abstract class BaseAPI {
   /** Base URL for all API requests */
   protected baseUrl: string;
+  /** Default Headers for all API requests */
+  protected defaultHeaders: Record<string, string>;
 
   /**
    * Creates a new BaseAPI instance
@@ -37,6 +39,11 @@ export abstract class BaseAPI {
    */
   constructor() {
     this.baseUrl = baseUrl;
+    this.defaultHeaders = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      "Content-Type": "application/json",
+    };
   }
 
   /**
@@ -52,7 +59,9 @@ export abstract class BaseAPI {
     params?: RefinedParams<ResponseType>
   ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
-    const response = http.get(url, params);
+    const mergedParams = this.mergeParams(params);
+
+    const response = http.get(url, mergedParams);
     this.validateResponse(
       response,
       StatusCode.SuccessOK,
@@ -76,9 +85,14 @@ export abstract class BaseAPI {
     params?: RefinedParams<ResponseType>
   ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
+    const mergedParams = this.mergeParams(params);
+
     const response = http.post(url, JSON.stringify(body), {
-      headers: { "Content-Type": "application/json" },
-      ...params,
+      headers: {
+        ...mergedParams.headers,
+        "Content-Type": "application/json",
+      },
+      ...mergedParams,
     });
     this.validateResponse(
       response,
@@ -103,9 +117,14 @@ export abstract class BaseAPI {
     params?: RefinedParams<ResponseType>
   ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
+    const mergedParams = this.mergeParams(params);
+
     const response = http.put(url, JSON.stringify(body), {
-      headers: { "Content-Type": "application/json" },
-      ...params,
+      headers: {
+        ...mergedParams.headers,
+        "Content-Type": "application/json",
+      },
+      ...mergedParams,
     });
     this.validateResponse(
       response,
@@ -130,9 +149,14 @@ export abstract class BaseAPI {
     params?: RefinedParams<ResponseType>
   ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
+    const mergedParams = this.mergeParams(params);
+
     const response = http.patch(url, JSON.stringify(body), {
-      headers: { "Content-Type": "application/json" },
-      ...params,
+      headers: {
+        ...mergedParams.headers,
+        "Content-Type": "application/json",
+      },
+      ...mergedParams,
     });
     this.validateResponse(
       response,
@@ -155,7 +179,9 @@ export abstract class BaseAPI {
     params?: RefinedParams<ResponseType>
   ): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
-    const response = http.del(url, null, params);
+    const mergedParams = this.mergeParams(params);
+
+    const response = http.del(url, null, mergedParams);
     this.validateResponse(
       response,
       StatusCode.SuccessOK,
@@ -171,7 +197,15 @@ export abstract class BaseAPI {
    * @protected
    */
   protected async batch(requests: any[]): Promise<any[]> {
-    const responses = http.batch(requests);
+    // For batch requests, you might want to ensure each request has default headers
+    const requestsWithDefaults = requests.map((request) => ({
+      ...request,
+      params: request.params
+        ? this.mergeParams(request.params)
+        : { headers: this.defaultHeaders },
+    }));
+
+    const responses = http.batch(requestsWithDefaults);
     return responses;
   }
 
@@ -216,5 +250,27 @@ export abstract class BaseAPI {
     customResponseTime.add(response.timings.duration, { endpoint });
 
     return allChecksPassed;
+  }
+
+  /**
+   * Merges default headers with provided parameters
+   * @param params - Optional HTTP request parameters
+   * @returns Merged parameters with default headers included
+   * @protected
+   */
+  protected mergeParams(
+    params?: RefinedParams<ResponseType>
+  ): RefinedParams<ResponseType> {
+    if (!params) {
+      return { headers: this.defaultHeaders };
+    }
+
+    return {
+      ...params,
+      headers: {
+        ...this.defaultHeaders,
+        ...params.headers,
+      },
+    };
   }
 }
