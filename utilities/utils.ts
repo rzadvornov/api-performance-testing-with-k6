@@ -12,16 +12,6 @@ export function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-export function getRandomProduct(): Product {
-  return {
-    title: `Performance Test Product ${getRandomInt(1, 10000)}`,
-    price: Math.round((Math.random() * 1000 + 10) * 100) / 100,
-    description: "This is a performance test product",
-    category: getRandomElement(TEST_DATA.CATEGORIES),
-    image: "https://via.placeholder.com/640x480.png/09f/fff",
-  };
-}
-
 export function getRandomUser(): User {
   const id = getRandomInt(1, 100000);
   return {

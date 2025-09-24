@@ -1,100 +1,118 @@
-import { HTTPMethod } from "http-method-enum";
+import http, { RefinedResponse } from "k6/http";
 import { BaseAPI } from "../BaseAPI";
-import { User } from "../types/user";
+import HTTPMethod from "http-method-enum";
 
+/**
+ * API client for Users endpoints
+ * Handles all user-related operations including CRUD operations
+ *
+ * @class UsersAPI
+ * @extends BaseAPI
+ */
 export class UsersAPI extends BaseAPI {
+  private readonly endpoint = "/users";
+
   /**
-   * Retrieves all users from the API
-   * @returns Promise resolving to the list of users
-   * @async
+   * Retrieves all users with optional pagination
+   * @param offset - Number of items to skip (default: 0)
+   * @param limit - Number of items to return (default: 10)
+   * @returns HTTP response containing users list
    */
-  async getAllUsers(): Promise<any> {
-    return this.get("/users");
+  getAllUsers<RT extends http.ResponseType | undefined>(
+    offset: number = 0,
+    limit: number = 10
+  ): RefinedResponse<RT> {
+    const params = new URLSearchParams({
+      offset: offset.toString(),
+      limit: limit.toString(),
+    });
+    return this.get(`${this.endpoint}?${params.toString()}`);
   }
 
   /**
-   * Retrieves a specific user by their ID
-   * @param id - The unique identifier of the user
-   * @returns Promise resolving to the user data
-   * @async
+   * Retrieves a single user by ID
+   * @param userId - The unique identifier of the user
+   * @returns HTTP response containing user details
    */
-  async getUser(id: number): Promise<any> {
-    return this.get(`/users/${id}`);
+  getUserById<RT extends http.ResponseType | undefined>(
+    userId: number
+  ): RefinedResponse<RT> {
+    return this.get(`${this.endpoint}/${userId}`);
   }
 
   /**
    * Creates a new user
-   * @param user - The user data to create
-   * @returns Promise resolving to the created user with generated ID
-   * @async
+   * @param userData - The user data to create
+   * @returns HTTP response containing created user
    */
-  async createUser(user: User): Promise<any> {
-    return this.post("/users", user);
+  createUser<RT extends http.ResponseType | undefined>(
+    userData: any
+  ): RefinedResponse<RT> {
+    return this.post(this.endpoint, userData);
   }
 
   /**
-   * Fully updates an existing user
-   * @param id - The ID of the user to update
-   * @param user - The complete user data for replacement
-   * @returns Promise resolving to the updated user
-   * @async
+   * Updates an existing user using PUT method
+   * @param userId - The unique identifier of the user to update
+   * @param userData - The updated user data
+   * @returns HTTP response containing updated user
    */
-  async updateUser(id: number, user: User): Promise<any> {
-    return this.put(`/users/${id}`, { ...user, id });
+  updateUser<RT extends http.ResponseType | undefined>(
+    userId: number,
+    userData: object
+  ): RefinedResponse<RT> {
+    return this.put(`${this.endpoint}/${userId}`, userData);
   }
 
   /**
-   * Partially updates an existing user with specific fields
-   * @param id - The ID of the user to update
-   * @param updates - Partial user data containing only fields to update
-   * @returns Promise resolving to the partially updated user
-   * @async
+   * Partially updates an existing user using PATCH method
+   * @param userId - The unique identifier of the user to update
+   * @param userData - The partial user data to update
+   * @returns HTTP response containing updated user
    */
-  async partialUpdateUser(id: number, updates: Partial<User>): Promise<any> {
-    return this.patch(`/users/${id}`, { ...updates, id });
+  patchUser<RT extends http.ResponseType | undefined>(
+    userId: number,
+    userData: object
+  ): RefinedResponse<RT> {
+    return this.patch(`${this.endpoint}/${userId}`, userData);
   }
 
   /**
-   * Deletes a user by their ID
-   * @param id - The ID of the user to delete
-   * @returns Promise resolving to the deletion result
-   * @async
+   * Deletes a user by ID
+   * @param userId - The unique identifier of the user to delete
+   * @returns HTTP response confirming deletion
    */
-  async deleteUser(id: number): Promise<any> {
-    return this.delete(`/users/${id}`);
+  deleteUser<RT extends http.ResponseType | undefined>(
+    userId: number
+  ): RefinedResponse<RT> {
+    return this.delete(`${this.endpoint}/${userId}`);
   }
 
   /**
-   * Retrieves a limited number of users
-   * @param limit - Maximum number of users to return
-   * @returns Promise resolving to limited user list
-   * @async
+   * Checks if an email is available (not taken by another user)
+   * @param email - The email address to check
+   * @returns HTTP response indicating email availability
    */
-  async getLimitedUsers(limit: number): Promise<any> {
-    return this.get(`/users?limit=${limit}`);
+  checkEmailAvailability<RT extends http.ResponseType | undefined>(
+    email: string
+  ): RefinedResponse<RT> {
+    const params = new URLSearchParams({
+      email: email,
+    });
+    return this.get(`${this.endpoint}/is-available?${params.toString()}`);
   }
 
   /**
-   * Retrieves users sorted by specified criteria
-   * @param sort - Sort direction: 'asc' for ascending, 'desc' for descending
-   * @returns Promise resolving to sorted user list
-   * @async
+   * Retrieves multiple users by batch processing
+   * @param userIds - Array of user IDs to retrieve
+   * @returns Promise resolving to array of HTTP responses
    */
-  async getSortedUsers(sort: "asc" | "desc" = "asc"): Promise<any> {
-    return this.get(`/users?sort=${sort}`);
-  }
-
-  /**
-   * Performs batch retrieval of multiple users for performance testing
-   * @param ids - Array of user IDs to retrieve in batch
-   * @returns Promise resolving to array of user responses
-   * @async
-   */
-  async batchGetUsers(ids: number[]): Promise<any[]> {
-    const requests = ids.map((id) => ({
-      method: `${HTTPMethod.GET}`,
-      url: `${this.baseUrl}/users/${id}`,
-      tags: { name: `batch_get_user_${id}` },
+  getUsersBatch<RT extends http.ResponseType | undefined>(
+    userIds: number[]
+  ): RefinedResponse<RT>[] {
+    const requests = userIds.map((id) => ({
+      method: HTTPMethod.GET,
+      url: `${this.baseUrl}${this.endpoint}/${id}`,
     }));
     return this.batch(requests);
   }

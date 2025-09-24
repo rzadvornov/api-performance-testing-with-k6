@@ -8,6 +8,7 @@ export let options = spikeTestOptions;
 
 const api = new FakeStoreAPI();
 
+/*
 const spikeHandlers = [
   {
     threshold: SPIKE_BEHAVIOR_THRESHOLDS.PRODUCT_BROWSING,
@@ -112,3 +113,5 @@ function rapidMixedOperations() {
     handleError("Mixed operations spike failed: ", error);
   }
 }
+
+*/

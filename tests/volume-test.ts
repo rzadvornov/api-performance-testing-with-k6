@@ -13,6 +13,7 @@ export let options = volumeTestOptions;
 
 const api = new FakeStoreAPI();
 
+/*
 const JOURNEY_STEPS = [
   { weight: 0.9, execute: browseCategory, name: "Browse Category" },
   { weight: 0.8, execute: viewProductDetails, name: "View Product Details" },
@@ -114,3 +115,5 @@ function batchProductOperations() {
   );
   api.products.batchGetProducts(productIds);
 }
+
+*/

@@ -1,122 +1,155 @@
-import { HTTPMethod } from "http-method-enum";
+import HTTPMethod from "http-method-enum";
 import { BaseAPI } from "../BaseAPI";
-import { Product } from "../types/product";
+import http, { RefinedResponse } from "k6/http";
 
+/**
+ * API client for Products endpoints
+ * Handles all product-related operations including CRUD operations
+ *
+ * @class ProductsAPI
+ * @extends BaseAPI
+ */
 export class ProductsAPI extends BaseAPI {
+  private readonly endpoint = "/products";
+
   /**
-   * Retrieves all products from the API
-   * @returns Promise resolving to the list of products
-   * @async
+   * Retrieves all products with optional pagination
+   * @param offset - Number of items to skip (default: 0)
+   * @param limit - Number of items to return (default: 10)
+   * @returns HTTP response containing products list
    */
-  async getAllProducts(): Promise<any> {
-    return this.get("/products");
+  getAllProducts<RT extends http.ResponseType | undefined>(
+    offset: number = 0,
+    limit: number = 10
+  ): RefinedResponse<RT> {
+    const params = new URLSearchParams({
+      offset: offset.toString(),
+      limit: limit.toString(),
+    });
+    return this.get(`${this.endpoint}?${params.toString()}`);
   }
 
   /**
-   * Retrieves a specific product by its ID
-   * @param id - The unique identifier of the product
-   * @returns Promise resolving to the product data
-   * @async
+   * Retrieves a single product by ID
+   * @param productId - The unique identifier of the product
+   * @returns HTTP response containing product details
    */
-  async getProduct(id: number): Promise<any> {
-    return this.get(`/products/${id}`);
+  getProductById<RT extends http.ResponseType | undefined>(
+    productId: number
+  ): RefinedResponse<RT> {
+    return this.get(`${this.endpoint}/${productId}`);
   }
 
   /**
-   * Retrieves all available product categories
-   * @returns Promise resolving to the list of categories
-   * @async
+   * Retrieves products filtered by category
+   * @param categoryId - The category ID to filter by
+   * @param offset - Number of items to skip (default: 0)
+   * @param limit - Number of items to return (default: 10)
+   * @returns HTTP response containing filtered products
    */
-  async getProductCategories(): Promise<any> {
-    return this.get("/products/categories");
+  getProductsByCategory<RT extends http.ResponseType | undefined>(
+    categoryId: number,
+    offset: number = 0,
+    limit: number = 10
+  ): RefinedResponse<RT> {
+    const params = new URLSearchParams({
+      categoryId: categoryId.toString(),
+      offset: offset.toString(),
+      limit: limit.toString(),
+    });
+    return this.get(`${this.endpoint}?${params.toString()}`);
   }
 
   /**
-   * Retrieves products belonging to a specific category
-   * @param category - The category name to filter products by
-   * @returns Promise resolving to products in the specified category
-   * @async
+   * Retrieves products filtered by price range
+   * @param minPrice - Minimum price filter
+   * @param maxPrice - Maximum price filter
+   * @returns HTTP response containing filtered products
    */
-  async getProductsByCategory(category: string): Promise<any> {
-    return this.get(`/products/category/${encodeURIComponent(category)}`);
+  getProductsByPriceRange<RT extends http.ResponseType | undefined>(
+    minPrice: number,
+    maxPrice: number
+  ): RefinedResponse<RT> {
+    const params = new URLSearchParams({
+      price_min: minPrice.toString(),
+      price_max: maxPrice.toString(),
+    });
+    return this.get(`${this.endpoint}?${params.toString()}`);
   }
 
   /**
    * Creates a new product
-   * @param product - The product data to create
-   * @returns Promise resolving to the created product with generated ID
-   * @async
+   * @param productData - The product data to create
+   * @returns HTTP response containing created product
    */
-  async createProduct(product: Product): Promise<any> {
-    return this.post("/products", product);
+  createProduct<RT extends http.ResponseType | undefined>(
+    productData: object
+  ): RefinedResponse<RT> {
+    return this.post(this.endpoint, productData);
   }
 
   /**
-   * Fully updates an existing product
-   * @param id - The ID of the product to update
-   * @param product - The complete product data for replacement
-   * @returns Promise resolving to the updated product
-   * @async
+   * Updates an existing product using PUT method
+   * @param productId - The unique identifier of the product to update
+   * @param productData - The updated product data
+   * @returns HTTP response containing updated product
    */
-  async updateProduct(id: number, product: Product): Promise<any> {
-    return this.put(`/products/${id}`, { ...product, id });
+  updateProduct<RT extends http.ResponseType | undefined>(
+    productId: number,
+    productData: object
+  ): RefinedResponse<RT> {
+    return this.put(`${this.endpoint}/${productId}`, productData);
   }
 
   /**
-   * Partially updates an existing product with specific fields
-   * @param id - The ID of the product to update
-   * @param updates - Partial product data containing only fields to update
-   * @returns Promise resolving to the partially updated product
-   * @async
+   * Partially updates an existing product using PATCH method
+   * @param productId - The unique identifier of the product to update
+   * @param productData - The partial product data to update
+   * @returns HTTP response containing updated product
    */
-  async partialUpdateProduct(
-    id: number,
-    updates: Partial<Product>
-  ): Promise<any> {
-    return this.patch(`/products/${id}`, { ...updates, id });
+  patchProduct<RT extends http.ResponseType | undefined>(
+    productId: number,
+    productData: object
+  ): RefinedResponse<RT> {
+    return this.patch(`${this.endpoint}/${productId}`, productData);
   }
 
   /**
-   * Deletes a product by its ID
-   * @param id - The ID of the product to delete
-   * @returns Promise resolving to the deletion result
-   * @async
+   * Deletes a product by ID
+   * @param productId - The unique identifier of the product to delete
+   * @returns HTTP response confirming deletion
    */
-  async deleteProduct(id: number): Promise<any> {
-    return this.delete(`/products/${id}`);
+  deleteProduct<RT extends http.ResponseType | undefined>(
+    productId: number
+  ): RefinedResponse<RT> {
+    return this.delete(`${this.endpoint}/${productId}`);
   }
 
   /**
-   * Retrieves a limited number of products
-   * @param limit - Maximum number of products to return
-   * @returns Promise resolving to limited product list
-   * @async
+   * Searches products by title
+   * @param title - The title to search for
+   * @returns HTTP response containing matching products
    */
-  async getLimitedProducts(limit: number): Promise<any> {
-    return this.get(`/products?limit=${limit}`);
+  searchProducts<RT extends http.ResponseType | undefined>(
+    title: string
+  ): RefinedResponse<RT> {
+    const params = new URLSearchParams({
+      title: title,
+    });
+    return this.get(`${this.endpoint}?${params.toString()}`);
   }
 
   /**
-   * Retrieves products sorted by price
-   * @param sort - Sort direction: 'asc' for ascending, 'desc' for descending
-   * @returns Promise resolving to sorted product list
-   * @async
+   * Retrieves multiple products by batch processing
+   * @param productIds - Array of product IDs to retrieve
+   * @returns Array of HTTP responses
    */
-  async getSortedProducts(sort: "asc" | "desc" = "asc"): Promise<any> {
-    return this.get(`/products?sort=${sort}`);
-  }
-
-  /**
-   * Performs batch retrieval of multiple products for performance testing
-   * @param ids - Array of product IDs to retrieve in batch
-   * @returns Promise resolving to array of product responses
-   * @async
-   */
-  async batchGetProducts(ids: number[]): Promise<any[]> {
-    const requests = ids.map((id) => ({
-      method: `${HTTPMethod.GET}`,
-      url: `${this.baseUrl}/products/${id}`,
-      tags: { name: `batch_get_product_${id}` },
+  getProductsBatch<RT extends http.ResponseType | undefined>(
+    productIds: number[]
+  ): RefinedResponse<RT>[] {
+    const requests = productIds.map((id) => ({
+      method: HTTPMethod.GET,
+      url: `${this.baseUrl}${this.endpoint}/${id}`,
     }));
     return this.batch(requests);
   }

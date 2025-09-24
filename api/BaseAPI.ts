@@ -1,4 +1,7 @@
-import http, { ResponseType, RefinedParams } from "k6/http";
+import http, {
+  RefinedParams,
+  RefinedResponse,
+} from "k6/http";
 import { baseUrl } from "../config";
 import { StatusCode } from "status-code-enum";
 import { check } from "k6";
@@ -28,6 +31,7 @@ export const customResponseTime = new Trend("custom_response_time");
  * @protected
  */
 export abstract class BaseAPI {
+  
   /** Base URL for all API requests */
   protected baseUrl: string;
   /** Default Headers for all API requests */
@@ -50,14 +54,13 @@ export abstract class BaseAPI {
    * Performs an HTTP GET request
    * @param endpoint - API endpoint path (relative to base URL)
    * @param params - Optional HTTP request parameters
-   * @returns Promise resolving to the HTTP response
-   * @throws Will throw error if response validation fails
+   * @returns HTTP response object
    * @protected
    */
-  protected async get(
+  protected get<RT extends http.ResponseType | undefined>(
     endpoint: string,
-    params?: RefinedParams<ResponseType>
-  ): Promise<any> {
+    params?: RefinedParams<RT>
+  ): RefinedResponse<RT> {
     const url = `${this.baseUrl}${endpoint}`;
     const mergedParams = this.mergeParams(params);
 
@@ -75,15 +78,14 @@ export abstract class BaseAPI {
    * @param endpoint - API endpoint path (relative to base URL)
    * @param body - Request body to be serialized as JSON
    * @param params - Optional HTTP request parameters
-   * @returns Promise resolving to the HTTP response
-   * @throws Will throw error if response validation fails
+   * @returns HTTP response object
    * @protected
    */
-  protected async post(
+  protected post<RT extends http.ResponseType | undefined>(
     endpoint: string,
-    body: any,
-    params?: RefinedParams<ResponseType>
-  ): Promise<any> {
+    body: object,
+    params?: RefinedParams<RT>
+  ): RefinedResponse<RT> {
     const url = `${this.baseUrl}${endpoint}`;
     const mergedParams = this.mergeParams(params);
 
@@ -107,15 +109,14 @@ export abstract class BaseAPI {
    * @param endpoint - API endpoint path (relative to base URL)
    * @param body - Request body to be serialized as JSON
    * @param params - Optional HTTP request parameters
-   * @returns Promise resolving to the HTTP response
-   * @throws Will throw error if response validation fails
+   * @returns HTTP response object
    * @protected
    */
-  protected async put(
+  protected put<RT extends http.ResponseType | undefined>(
     endpoint: string,
-    body: any,
-    params?: RefinedParams<ResponseType>
-  ): Promise<any> {
+    body: object,
+    params?: RefinedParams<RT>
+  ): RefinedResponse<RT> {
     const url = `${this.baseUrl}${endpoint}`;
     const mergedParams = this.mergeParams(params);
 
@@ -139,15 +140,14 @@ export abstract class BaseAPI {
    * @param endpoint - API endpoint path (relative to base URL)
    * @param body - Request body to be serialized as JSON
    * @param params - Optional HTTP request parameters
-   * @returns Promise resolving to the HTTP response
-   * @throws Will throw error if response validation fails
+   * @returns HTTP response object
    * @protected
    */
-  protected async patch(
+  protected patch<RT extends http.ResponseType | undefined>(
     endpoint: string,
-    body: any,
-    params?: RefinedParams<ResponseType>
-  ): Promise<any> {
+    body: object,
+    params?: RefinedParams<RT>
+  ): RefinedResponse<RT> {
     const url = `${this.baseUrl}${endpoint}`;
     const mergedParams = this.mergeParams(params);
 
@@ -170,14 +170,13 @@ export abstract class BaseAPI {
    * Performs an HTTP DELETE request
    * @param endpoint - API endpoint path (relative to base URL)
    * @param params - Optional HTTP request parameters
-   * @returns Promise resolving to the HTTP response
-   * @throws Will throw error if response validation fails
+   * @returns HTTP response object
    * @protected
    */
-  protected async delete(
+  protected delete<RT extends http.ResponseType | undefined>(
     endpoint: string,
-    params?: RefinedParams<ResponseType>
-  ): Promise<any> {
+    params?: RefinedParams<RT>
+  ): RefinedResponse<RT> {
     const url = `${this.baseUrl}${endpoint}`;
     const mergedParams = this.mergeParams(params);
 
@@ -193,16 +192,21 @@ export abstract class BaseAPI {
   /**
    * Performs multiple HTTP requests in parallel (batch processing)
    * @param requests - Array of request objects to execute
-   * @returns Promise resolving to array of HTTP responses
+   * @returns Array of HTTP responses
    * @protected
    */
-  protected async batch(requests: any[]): Promise<any[]> {
-    // For batch requests, you might want to ensure each request has default headers
+  protected batch<RT extends http.ResponseType | undefined>(
+    requests: Array<{
+      method: string;
+      url: string;
+      params?: RefinedParams<RT>;
+    }>
+  ): RefinedResponse<RT>[] {
     const requestsWithDefaults = requests.map((request) => ({
       ...request,
       params: request.params
         ? this.mergeParams(request.params)
-        : { headers: this.defaultHeaders },
+        : ({ headers: this.defaultHeaders } as RefinedParams<RT>),
     }));
 
     const responses = http.batch(requestsWithDefaults);
@@ -210,43 +214,75 @@ export abstract class BaseAPI {
   }
 
   /**
-   * Validates HTTP response against expected criteria and updates metrics
-   * @param response - HTTP response object to validate
-   * @param expectedStatus - Expected HTTP status code (default: 200)
-   * @param endpoint - Endpoint identifier for metrics tagging
-   * @returns Boolean indicating whether all validation checks passed
-   * @protected
+   * Validates an HTTP response against a set of common criteria.
+   * @template RT The response type, typically http.ResponseType | undefined.
+   * @param {RefinedResponse<RT>} response The HTTP response object from k6.
+   * @param {number} [expectedStatus=StatusCode.SuccessOK] The expected HTTP status code.
+   * @param {string} [endpoint=""] A descriptive name for the endpoint being tested.
+   * @returns {boolean} True if all checks pass, false otherwise.
    */
-  protected validateResponse(
-    response: any,
+  protected validateResponse<RT extends http.ResponseType | undefined>(
+    response: RefinedResponse<RT>,
     expectedStatus: number = StatusCode.SuccessOK,
     endpoint: string = ""
   ): boolean {
+    // Always add to the counter at the start of the validation process.
     apiCallsCounter.add(1, { endpoint });
 
-    const allChecksPassed = check(response, {
-      [`${endpoint} - status is ${expectedStatus}`]: (r) =>
+    const checks = {
+      // Check 1: Status Code
+      [`${endpoint} - status is ${expectedStatus}`]: (r: RefinedResponse<RT>) =>
         r.status === expectedStatus,
-      [`${endpoint} - response time < 500ms`]: (r) => r.timings.duration < 500,
-      [`${endpoint} - response has body`]: (r) => r.body && r.body.length > 0,
-      "response body is valid JSON": (r) => {
+
+      // Check 2: Response Time
+      [`${endpoint} - response time < 500ms`]: (r: RefinedResponse<RT>) =>
+        r.timings.duration < 500,
+    };
+
+    if (expectedStatus !== StatusCode.SuccessNoContent) {
+      // Check 3: Response Body
+      checks[`${endpoint} - response has a body`] = (r: RefinedResponse<RT>) =>
+        r.body !== null &&
+        r.body !== undefined &&
+        ((typeof r.body === "string" && r.body.length > 0) ||
+          (r.body instanceof ArrayBuffer && r.body.byteLength > 0));
+
+      // Check 4: Valid JSON
+      checks[`${endpoint} - response body is valid JSON`] = (
+        r: RefinedResponse<RT>
+      ) => {
+        // JSON parsing should only be attempted on non-empty string bodies.
+        if (typeof r.body !== "string" || r.body.length === 0) {
+          return false;
+        }
         try {
           JSON.parse(r.body);
           return true;
         } catch (e) {
+          console.error(`Failed to parse JSON for endpoint ${endpoint}: ${e}`);
           return false;
         }
-      },
-    });
+      };
+    }
 
-    console.log(
-      allChecksPassed
-        ? `${endpoint} - All checks passed in ${response.timings.duration}ms`
-        : `${endpoint} - One or more checks failed. Status: ${response.status}, Body: ${response.body}`
-    );
+    const allChecksPassed = check(response, checks);
 
+    const logMessage = allChecksPassed
+      ? `✅ ${endpoint} - All checks passed in ${response.timings.duration}ms`
+      : `❌ ${endpoint} - One or more checks failed! Status: ${
+          response.status
+        }, Duration: ${response.timings.duration}ms, Body length: ${
+          response.body instanceof ArrayBuffer
+            ? response.body.byteLength
+            : typeof response.body === "string"
+            ? response.body.length
+            : 0
+        }`;
+
+    console.log(logMessage);
+
+    // Update metrics based on the final result.
     errorRate.add(allChecksPassed ? 0 : 1, { endpoint });
-
     customResponseTime.add(response.timings.duration, { endpoint });
 
     return allChecksPassed;
@@ -258,11 +294,11 @@ export abstract class BaseAPI {
    * @returns Merged parameters with default headers included
    * @protected
    */
-  protected mergeParams(
-    params?: RefinedParams<ResponseType>
-  ): RefinedParams<ResponseType> {
+  protected mergeParams<RT extends http.ResponseType | undefined>(
+    params?: RefinedParams<RT>
+  ): RefinedParams<RT> {
     if (!params) {
-      return { headers: this.defaultHeaders };
+      return { headers: this.defaultHeaders } as RefinedParams<RT>;
     }
 
     return {
@@ -271,6 +307,6 @@ export abstract class BaseAPI {
         ...this.defaultHeaders,
         ...params.headers,
       },
-    };
+    } as RefinedParams<RT>;
   }
 }

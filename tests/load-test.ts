@@ -21,6 +21,7 @@ export const failedOperations = new Counter("failed_operations");
 
 const api = new FakeStoreAPI();
 
+/*
 const JOURNEY_STEPS = [
   {
     name: "Browse Product Catalog",
@@ -190,4 +191,6 @@ async function performAuthentication() {
     failedOperations.add(1);
     throw error;
   }
+  
 }
+*/

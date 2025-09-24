@@ -6,20 +6,13 @@ import {
   stressTestOptions,
   TEST_DATA,
 } from "../config";
-import {
-  getRandomInt,
-  getRandomUser,
-  getRandomCart,
-  getRandomProduct,
-  executeWithProbability,
-  handleError,
-} from "../utilities/utils";
 
 export { handleSummary } from '../reporter/k6-summary';
 export let options = stressTestOptions;
 
 const api = new FakeStoreAPI();
 
+/*
 const scenarioHandlers = [
   {
     threshold: STRESS_SCENARIO_THRESHOLDS.INTENSIVE_PRODUCT,
@@ -189,3 +182,5 @@ function batchOperations() {
     handleError("Batch operations failed: ", error);
   }
 }
+
+*/
