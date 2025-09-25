@@ -1,9 +1,10 @@
 name: K6 Endurance Tests
 
 on:
-  schedule:
-    # Run at 5:30 UTC every day
-    - cron: "30 5 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   endurance-tests:

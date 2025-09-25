@@ -1,57 +1,117 @@
-import { Product } from "../api/types/product";
-import { User } from "../api/types/user";
-import { Cart } from "../api/types/cart";
 import { sleep } from "k6";
-import { TEST_DATA } from "../config";
+import { WeightedScenario } from "../tests/config/types/weightedScenario";
+
+const conversionFactors: { [key: string]: number } = {
+    s: 1 / 60, 
+    m: 1, 
+    h: 60, 
+  };
+
+export function delay(minSeconds: number, maxSeconds?: number): void {
+  const effectiveMax = maxSeconds ?? minSeconds;
+
+  const min = Math.min(minSeconds, effectiveMax);
+  const max = Math.max(minSeconds, effectiveMax);
+
+  const range = max - min;
+
+  sleep(Math.random() * range + min);
+}
+
+/**
+ * Select scenario based on weighted probability and test duration
+ * @param scenarios An array of WeightedScenario objects.
+ * @param runningTime The current duration of the test in minutes.
+ * @returns The selected scenario function.
+ */
+export function selectWeightedScenario(
+  scenarios: WeightedScenario[],
+  runningTime: number
+): Function {
+  const effectiveWeights = scenarios.map((s) => {
+    let weight = s.baseWeight;
+    if (s.dynamicWeight) {
+      weight += s.dynamicWeight(runningTime);
+    }
+    return weight;
+  });
+
+  const totalWeight = effectiveWeights.reduce((sum, weight) => sum + weight, 0);
+
+  if (totalWeight === 0) {
+    return scenarios[0].func;
+  }
+
+  const random = Math.random() * totalWeight;
+
+  let cumulativeWeight = 0;
+  for (let i = 0; i < effectiveWeights.length; i++) {
+    cumulativeWeight += effectiveWeights[i];
+    if (random <= cumulativeWeight) {
+      return scenarios[i].func;
+    }
+  }
+
+  return scenarios[0].func;
+}
+
+export function calculateTotalMinutes(
+  stages: { duration: string; target: number }[]
+): number {
+  let totalMinutes = 0;
+
+  for (const stage of stages) {
+    const { factor, value } = convertValue(stage, conversionFactors);
+
+    if (factor !== undefined) {
+      totalMinutes += value * factor;
+    } else {
+      console.warn(
+        `Unsupported or invalid time unit in duration: ${stage.duration}. Skipping stage.`
+      );
+    }
+  }
+
+  return totalMinutes;
+}
+
+export function calculateMaximum(
+  stages: { duration: string; target: number }[]
+): number {
+  let durations = [];
+
+  for (const stage of stages) {
+    const { factor, value } = convertValue(stage, conversionFactors);
+
+    if (factor !== undefined) {
+      durations.push(value * factor);
+    } else {
+      console.warn(
+        `Unsupported or invalid time unit in duration: ${stage.duration}. Skipping stage.`
+      );
+    }
+  }
+
+  return Math.max(...durations);
+}
+
+function convertValue(stage: { duration: string; target: number; }, conversionFactors: { [key: string]: number; }) {
+  const durationStr = stage.duration.toLowerCase();
+  const unit = durationStr.slice(-1);
+  const value = parseFloat(durationStr);
+
+  const factor = conversionFactors[unit];
+  return { factor, value };
+}
 
 export function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+
+
 export function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
-}
-
-export function getRandomUser(): User {
-  const id = getRandomInt(1, 100000);
-  return {
-    email: `perftest${id}@example.com`,
-    username: `perfuser${id}`,
-    password: "testpass123",
-    name: {
-      firstname: `TestUser${id}`,
-      lastname: `LastName${id}`,
-    },
-    address: {
-      city: "Test City",
-      street: "Performance St",
-      number: getRandomInt(1, 9999),
-      zipcode: `${getRandomInt(10000, 99999)}`,
-      geolocation: {
-        lat: (Math.random() * 180 - 90).toFixed(4),
-        long: (Math.random() * 360 - 180).toFixed(4),
-      },
-    },
-    phone: `1-555-${getRandomInt(100, 999)}-${getRandomInt(1000, 9999)}`,
-  };
-}
-
-export function getRandomCart(): Cart {
-  const productCount = getRandomInt(1, 5);
-  const products: Array<{ productId: number; quantity: number }> = [];
-
-  for (let i = 0; i < productCount; i++) {
-    products.push({
-      productId: getRandomInt(1, 20),
-      quantity: getRandomInt(1, 5),
-    });
-  }
-
-  return {
-    userId: getRandomInt(1, 10),
-    date: new Date().toISOString().split("T")[0],
-    products,
-  };
 }
 
 export async function exponentialBackoff<T>(
@@ -92,7 +152,10 @@ export function weightedRandom<T extends { weight: number }>(items: T[]): T {
   return items[items.length - 1]; // Fallback
 }
 
-export function executeWithProbability(probability: number, callback: () => void): boolean {
+export function executeWithProbability(
+  probability: number,
+  callback: () => void
+): boolean {
   if (Math.random() < probability) {
     callback();
     return true;

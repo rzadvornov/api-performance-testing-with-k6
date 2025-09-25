@@ -1,7 +1,7 @@
 import { sleep } from "k6";
 import { Counter, Rate, Trend } from "k6/metrics";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
-import { loadTestOptions, TEST_DATA } from "../config";
+import { loadTestOptions, TEST_DATA } from "./config/config";
 import {
   getRandomInt,
   getRandomElement,
@@ -10,7 +10,7 @@ import {
   handleError,
 } from "../utilities/utils";
 
-export { handleSummary } from '../reporter/k6-summary';
+export { handleSummary } from "../reporter/k6-summary";
 export let options = loadTestOptions;
 
 export const scenarioCounter = new Counter("scenario_executions");

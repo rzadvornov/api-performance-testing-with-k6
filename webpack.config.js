@@ -27,5 +27,5 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   target: 'node',
-  externals: [/^k6(\/.*)?/],
+  externals: [/^k6(\/.*)?/,],
 };

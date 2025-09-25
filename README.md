@@ -120,7 +120,7 @@ npm run test:comprehensive
 
 ### Endurance Test
 - **Purpose**: Long-term stability and memory leak detection
-- **Pattern**: 8 users sustained for 20 minutes
+- **Pattern**: 8 users sustained for 40 minutes
 - **Scenarios**: Regular user activity, maintenance simulation, cache warmup
 - **Key Metrics**: Performance consistency, Memory leak detection, Resource cleanup
 

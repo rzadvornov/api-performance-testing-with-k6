@@ -22,11 +22,11 @@ export class CategoriesAPI extends BaseAPI {
     offset: number = 0,
     limit: number = 10
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      offset: offset.toString(),
-      limit: limit.toString(),
-    });
-    return this.get(`${this.endpoint}?${params.toString()}`);
+    // Simple construction without encoding - numbers are safe
+    const queryString = `offset=${offset}&limit=${limit}`;
+    const endpointWithParams = `${this.endpoint}?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**
@@ -52,13 +52,11 @@ export class CategoriesAPI extends BaseAPI {
     offset: number = 0,
     limit: number = 10
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      offset: offset.toString(),
-      limit: limit.toString(),
-    });
-    return this.get(
-      `${this.endpoint}/${categoryId}/products?${params.toString()}`
-    );
+    // Simple construction - categoryId, offset, and limit are all numbers (safe)
+    const queryString = `offset=${offset}&limit=${limit}`;
+    const endpointWithParams = `${this.endpoint}/${categoryId}/products?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**

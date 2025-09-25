@@ -1,4 +1,4 @@
-import http, { RefinedResponse } from "k6/http";
+import http, { RefinedParams, RefinedResponse } from "k6/http";
 import { BaseAPI } from "../BaseAPI";
 import HTTPMethod from "http-method-enum";
 
@@ -22,11 +22,10 @@ export class UsersAPI extends BaseAPI {
     offset: number = 0,
     limit: number = 10
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      offset: offset.toString(),
-      limit: limit.toString(),
-    });
-    return this.get(`${this.endpoint}?${params.toString()}`);
+    const queryString = `offset=${offset}&limit=${limit}`;
+    const endpointWithParams = `${this.endpoint}?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**
@@ -96,10 +95,10 @@ export class UsersAPI extends BaseAPI {
   checkEmailAvailability<RT extends http.ResponseType | undefined>(
     email: string
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      email: email,
-    });
-    return this.get(`${this.endpoint}/is-available?${params.toString()}`);
+    const queryString = `email=${encodeURIComponent(email)}`;
+    const endpointWithParams = `${this.endpoint}/is-available?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**

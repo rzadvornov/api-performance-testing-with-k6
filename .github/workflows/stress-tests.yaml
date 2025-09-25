@@ -1,9 +1,10 @@
 name: K6 Stress Tests
 
 on:
-  schedule:
-    # Run at 3:30 UTC every day
-    - cron: "30 3 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   stress-tests:

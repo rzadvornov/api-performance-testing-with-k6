@@ -5,9 +5,9 @@ import {
   STRESS_SCENARIO_THRESHOLDS,
   stressTestOptions,
   TEST_DATA,
-} from "../config";
+} from "./config/config";
 
-export { handleSummary } from '../reporter/k6-summary';
+export { handleSummary } from "../reporter/k6-summary";
 export let options = stressTestOptions;
 
 const api = new FakeStoreAPI();

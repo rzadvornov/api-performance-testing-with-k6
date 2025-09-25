@@ -1,9 +1,10 @@
 name: K6 Load Tests
 
 on:
-  schedule:
-    # Run at 8:30 UTC every day
-    - cron: "30 8 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   load-tests:

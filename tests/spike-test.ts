@@ -1,9 +1,18 @@
 import { sleep } from "k6";
-import { getRandomInt, executeWithProbability, handleError } from "../utilities/utils";
-import { spikeTestOptions, SPIKE_PRODUCT_RANGES, SPIKE_BEHAVIOR_THRESHOLDS, TEST_DATA } from "../config";
+import {
+  getRandomInt,
+  executeWithProbability,
+  handleError,
+} from "../utilities/utils";
+import {
+  spikeTestOptions,
+  SPIKE_PRODUCT_RANGES,
+  SPIKE_BEHAVIOR_THRESHOLDS,
+  TEST_DATA,
+} from "./config/config";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
 
-export { handleSummary } from '../reporter/k6-summary';
+export { handleSummary } from "../reporter/k6-summary";
 export let options = spikeTestOptions;
 
 const api = new FakeStoreAPI();

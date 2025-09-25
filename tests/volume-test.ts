@@ -1,13 +1,17 @@
 import { sleep } from "k6";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
-import { volumeTestOptions, USER_JOURNEY_CONFIG, TEST_DATA } from "../config";
+import {
+  volumeTestOptions,
+  USER_JOURNEY_CONFIG,
+  TEST_DATA,
+} from "./config/config";
 import {
   getRandomElement,
   getRandomInt,
   executeWithProbability,
   handleError,
 } from "../utilities/utils";
-export { handleSummary } from '../reporter/k6-summary';
+export { handleSummary } from "../reporter/k6-summary";
 
 export let options = volumeTestOptions;
 

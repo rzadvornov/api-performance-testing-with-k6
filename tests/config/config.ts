@@ -3,8 +3,6 @@ import { Options } from 'k6/options';
 // Base API configuration
 export const baseUrl = "https://api.escuelajs.co/api/v1";
 
-
-
 // Test configuration constants
 export const TEST_CONFIG = {
   // Load test - normal expected load
@@ -71,7 +69,7 @@ export const TEST_CONFIG = {
   ENDURANCE_TEST: {
     stages: [
       { duration: '2m', target: 8 },    // Ramp up
-      { duration: '20m', target: 8 },   // Long sustained load
+      { duration: '40m', target: 8 },   // Long sustained load
       { duration: '2m', target: 0 },    // Ramp down
     ],
     thresholds: {

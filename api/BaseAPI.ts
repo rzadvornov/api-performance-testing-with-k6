@@ -1,8 +1,5 @@
-import http, {
-  RefinedParams,
-  RefinedResponse,
-} from "k6/http";
-import { baseUrl } from "../config";
+import http, { RefinedParams, RefinedResponse } from "k6/http";
+import { baseUrl } from "../tests/config/config";
 import { StatusCode } from "status-code-enum";
 import { check } from "k6";
 import { Counter, Rate, Trend } from "k6/metrics";
@@ -31,7 +28,6 @@ export const customResponseTime = new Trend("custom_response_time");
  * @protected
  */
 export abstract class BaseAPI {
-  
   /** Base URL for all API requests */
   protected baseUrl: string;
   /** Default Headers for all API requests */

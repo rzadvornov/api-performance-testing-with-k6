@@ -22,11 +22,10 @@ export class ProductsAPI extends BaseAPI {
     offset: number = 0,
     limit: number = 10
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      offset: offset.toString(),
-      limit: limit.toString(),
-    });
-    return this.get(`${this.endpoint}?${params.toString()}`);
+    const queryString = `offset=${offset}&limit=${limit}`;
+    const endpointWithParams = `${this.endpoint}?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**
@@ -52,12 +51,10 @@ export class ProductsAPI extends BaseAPI {
     offset: number = 0,
     limit: number = 10
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      categoryId: categoryId.toString(),
-      offset: offset.toString(),
-      limit: limit.toString(),
-    });
-    return this.get(`${this.endpoint}?${params.toString()}`);
+    const queryString = `categoryId=${categoryId}&offset=${offset}&limit=${limit}`;
+    const endpointWithParams = `${this.endpoint}?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**
@@ -70,11 +67,10 @@ export class ProductsAPI extends BaseAPI {
     minPrice: number,
     maxPrice: number
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      price_min: minPrice.toString(),
-      price_max: maxPrice.toString(),
-    });
-    return this.get(`${this.endpoint}?${params.toString()}`);
+    const queryString = `price_min=${minPrice}&price_max=${maxPrice}`;
+    const endpointWithParams = `${this.endpoint}?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**
@@ -133,10 +129,10 @@ export class ProductsAPI extends BaseAPI {
   searchProducts<RT extends http.ResponseType | undefined>(
     title: string
   ): RefinedResponse<RT> {
-    const params = new URLSearchParams({
-      title: title,
-    });
-    return this.get(`${this.endpoint}?${params.toString()}`);
+    const queryString = `title=${encodeURIComponent(title)}`;
+    const endpointWithParams = `${this.endpoint}?${queryString}`;
+
+    return this.get<RT>(endpointWithParams);
   }
 
   /**
