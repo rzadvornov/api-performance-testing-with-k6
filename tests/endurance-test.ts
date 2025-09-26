@@ -10,6 +10,28 @@ import {
 import { WeightedScenario } from "./config/types/weightedScenario";
 import { ENDURANCE_CONFIG } from "./config/enduranceConfig";
 
+type ValidScenarioName = Extract<
+  keyof typeof ENDURANCE_CONFIG.scenarios,
+  string
+>;
+
+const scenarioFunctions: Record<ValidScenarioName, Function> = {
+  regularUserActivity: regularUserActivity,
+  periodicMaintenanceSimulation: periodicMaintenanceSimulation,
+  longTermBrowsingSession: longTermBrowsingSession,
+  authenticatedUserSession: authenticatedUserSession,
+  backgroundDataProcessing: backgroundDataProcessing,
+  cacheWarmupActivity: cacheWarmupActivity,
+  memoryStressPatterns: memoryStressPatterns,
+};
+
+const dynamicWeights: Partial<
+  Record<ValidScenarioName, (runningTime: number) => number>
+> = {
+  cacheWarmupActivity: (runningTime: number) => (runningTime > 10 ? 10 : 0),
+  memoryStressPatterns: (runningTime: number) => (runningTime > 20 ? 10 : 0),
+};
+
 export const options: Options = {
   stages: TEST_CONFIG.ENDURANCE_TEST.stages,
   thresholds: TEST_CONFIG.ENDURANCE_TEST.thresholds,
@@ -18,46 +40,20 @@ export const options: Options = {
   },
 };
 
-const weightedScenarios: WeightedScenario[] = [
-  {
-    name: "regularUserActivity",
-    func: regularUserActivity,
-    weight: 70,
-  },
-  {
-    name: "periodicMaintenanceSimulation",
-    func: periodicMaintenanceSimulation,
-    weight: 5,
-  },
-  {
-    name: "longTermBrowsingSession",
-    func: longTermBrowsingSession,
-    weight: 15,
-  },
-  {
-    name: "authenticatedUserSession",
-    func: authenticatedUserSession,
-    weight: 8,
-  },
-  {
-    name: "backgroundDataProcessing",
-    func: backgroundDataProcessing,
-    weight: 2,
-  },
-  {
-    name: "cacheWarmupActivity",
-    func: cacheWarmupActivity,
-    weight: 0, // Base is 0, entirely dynamic
-    // Dynamic weight function: more frequent after 10 minutes
-    dynamicWeight: (runningTime: number) => (runningTime > 10 ? 10 : 0),
-  },
-  {
-    name: "",
-    func: memoryStressPatterns,
-    weight: 0,
-    dynamicWeight: (runningTime: number) => (runningTime > 20 ? 10 : 0),
-  }
-];
+const weightedScenarios: WeightedScenario[] = (
+  Object.keys(ENDURANCE_CONFIG.scenarios) as ValidScenarioName[]
+)
+  .filter((scenarioName) => ENDURANCE_CONFIG.scenarios[scenarioName].enabled)
+  .map((scenarioName) => {
+    const config = ENDURANCE_CONFIG.scenarios[scenarioName];
+
+    return {
+      name: scenarioName,
+      func: scenarioFunctions[scenarioName],
+      weight: config.weight,
+      dynamicWeight: dynamicWeights[scenarioName],
+    };
+  });
 
 // Global counters for endurance tracking
 const api = new FakeStoreAPI();
@@ -180,7 +176,6 @@ function longTermBrowsingSession(_runningTime: number, _iteration: number) {
 
 function authenticatedUserSession(_runningTime: number, iteration: number) {
   try {
-    
     if (iteration % 20 === 0 || !api.auth.isAuthenticated()) {
       api.auth.login(TEST_DATA.USERS.LOGIN_CREDENTIALS);
       delay(0.2);
@@ -234,7 +229,6 @@ function backgroundDataProcessing(_runningTime: number, _iteration: number) {
 }
 
 function cacheWarmupActivity(_runningTime: number, iteration: number) {
-  
   api.products.getAllProducts(0, 10);
   api.categories.getAllCategories(0, 5);
   api.products.getProductById(1);

@@ -43,14 +43,16 @@ export const ENDURANCE_CONFIG: EnduranceTestConfig = {
       description: "Automated system operations",
     },
     cacheWarmupActivity: {
-      weight: 10,
+      // Base weight is 0. Dynamic weight is defined in the test file.
+      weight: 0,
       enabled: true,
-      description: "Keep frequently accessed data warm",
+      description: "Keep frequently accessed data warm (dynamic after 10 min)",
     },
     memoryStressPatterns: {
-      weight: 0, // Disabled by default, can be enabled for specific tests
-      enabled: false,
-      description: "Operations that might cause memory issues",
+      // Base weight is 0. Dynamic weight is defined in the test file.
+      weight: 0,
+      enabled: true, // Enabled so the function runs when dynamic weight is active
+      description: "Operations that might cause memory issues (dynamic after 20 min)",
     },
   },
 };
