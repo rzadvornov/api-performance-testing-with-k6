@@ -1,11 +1,12 @@
 import { sleep } from "k6";
 import { WeightedScenario } from "../tests/config/types/weightedScenario";
+import { PhaseWeightConfig } from "../tests/config/types/phaseWeightConfig";
 
 const conversionFactors: { [key: string]: number } = {
-    s: 1 / 60, 
-    m: 1, 
-    h: 60, 
-  };
+  s: 1 / 60,
+  m: 1,
+  h: 60,
+};
 
 export function delay(minSeconds: number, maxSeconds?: number): void {
   const effectiveMax = maxSeconds ?? minSeconds;
@@ -29,7 +30,7 @@ export function selectWeightedScenario(
   runningTime: number
 ): Function {
   const effectiveWeights = scenarios.map((s) => {
-    let weight = s.baseWeight;
+    let weight = s.weight;
     if (s.dynamicWeight) {
       weight += s.dynamicWeight(runningTime);
     }
@@ -53,6 +54,59 @@ export function selectWeightedScenario(
   }
 
   return scenarios[0].func;
+}
+
+/**
+ * Calculates the dynamic weight for a scenario based on the test's time-based phase
+ * (High Load vs. Baseline/Recovery).
+ * * @param runningTime The current duration of the test in minutes.
+ * @param scenarioName The name of the scenario to calculate the weight for.
+ * @param config The PhaseWeightConfig object containing all phase parameters.
+ * @returns The effective dynamic weight for the scenario (added to baseWeight).
+ */
+export function calculatePhaseSpecificWeight<T extends string>(
+  runningTime: number,
+  scenarioName: T,
+  config: PhaseWeightConfig<T> // New single config argument
+): number {
+  const {
+    phaseStartMinute,
+    phaseEndMinute,
+    scenarioConfigs,
+    totalHighLoadWeight,
+    highLoadScenarioCount,
+  } = config;
+
+  const isHighLoadPhase =
+    runningTime >= phaseStartMinute && runningTime < phaseEndMinute;
+  const scenarioConfig = scenarioConfigs[scenarioName];
+
+  if (!scenarioConfig) return 0;
+  const isBaselineScenario = scenarioConfig.weight > 0;
+
+  // High-Load scenarios are those with weight === 0
+  const isHighLoadScenario = scenarioConfig.weight === 0;
+
+  if (isHighLoadPhase) {
+    if (isBaselineScenario) {
+      return -scenarioConfig.weight;
+    }
+
+    if (isHighLoadScenario) {
+      if (highLoadScenarioCount === 0) return 0;
+      return Math.floor(totalHighLoadWeight / highLoadScenarioCount);
+    }
+  } else {
+    if (isHighLoadScenario) {
+      return 0;
+    }
+
+    if (isBaselineScenario) {
+      return 0;
+    }
+  }
+
+  return 0;
 }
 
 export function calculateTotalMinutes(
@@ -95,7 +149,10 @@ export function calculateMaximum(
   return Math.max(...durations);
 }
 
-function convertValue(stage: { duration: string; target: number; }, conversionFactors: { [key: string]: number; }) {
+function convertValue(
+  stage: { duration: string; target: number },
+  conversionFactors: { [key: string]: number }
+) {
   const durationStr = stage.duration.toLowerCase();
   const unit = durationStr.slice(-1);
   const value = parseFloat(durationStr);
@@ -107,8 +164,6 @@ function convertValue(stage: { duration: string; target: number; }, conversionFa
 export function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-
 
 export function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];

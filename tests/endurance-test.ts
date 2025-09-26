@@ -22,46 +22,45 @@ const weightedScenarios: WeightedScenario[] = [
   {
     name: "regularUserActivity",
     func: regularUserActivity,
-    baseWeight: 70,
+    weight: 70,
   },
   {
     name: "periodicMaintenanceSimulation",
     func: periodicMaintenanceSimulation,
-    baseWeight: 5,
+    weight: 5,
   },
   {
     name: "longTermBrowsingSession",
     func: longTermBrowsingSession,
-    baseWeight: 15,
+    weight: 15,
   },
   {
     name: "authenticatedUserSession",
     func: authenticatedUserSession,
-    baseWeight: 8,
+    weight: 8,
   },
   {
     name: "backgroundDataProcessing",
     func: backgroundDataProcessing,
-    baseWeight: 2,
+    weight: 2,
   },
   {
     name: "cacheWarmupActivity",
     func: cacheWarmupActivity,
-    baseWeight: 0, // Base is 0, entirely dynamic
+    weight: 0, // Base is 0, entirely dynamic
     // Dynamic weight function: more frequent after 10 minutes
     dynamicWeight: (runningTime: number) => (runningTime > 10 ? 10 : 0),
   },
   {
     name: "",
     func: memoryStressPatterns,
-    baseWeight: 0,
+    weight: 0,
     dynamicWeight: (runningTime: number) => (runningTime > 20 ? 10 : 0),
   }
 ];
 
-const api = new FakeStoreAPI();
-
 // Global counters for endurance tracking
+const api = new FakeStoreAPI();
 let iterationCount = 0;
 let sessionStartTime = Date.now();
 
@@ -275,9 +274,6 @@ function memoryStressPatterns(_runningTime: number, _iteration: number) {
   }
 }
 
-/**
- * Teardown function - runs once after the test completes
- */
 export function teardown(data: TeardownData) {
   const endTime = new Date();
   const duration = Math.floor((Date.now() - sessionStartTime) / 1000 / 60);

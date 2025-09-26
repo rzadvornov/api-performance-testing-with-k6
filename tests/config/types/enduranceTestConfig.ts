@@ -1,3 +1,4 @@
+import { Logging } from "./logging";
 import { ScenarioConfig } from "./scenarioConfig";
 import { StageConfig } from "./stageConfig";
 import { ThresholdConfig } from "./thresholdConfig";
@@ -16,7 +17,5 @@ export interface EnduranceTestConfig {
     min: number;
     max: number;
   };
-  logging: {
-    iterationInterval: number;
-  };
+  logging: Logging;
 }

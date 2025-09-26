@@ -1,6 +1,6 @@
 export type WeightedScenario = {
   name: string;
   func: Function;
-  baseWeight: number;
+  weight: number;
   dynamicWeight?: (runningTime: number) => number;
 };
