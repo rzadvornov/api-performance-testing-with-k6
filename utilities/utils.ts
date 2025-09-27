@@ -8,6 +8,13 @@ const conversionFactors: { [key: string]: number } = {
   h: 60,
 };
 
+/**
+ * Executes a randomized sleep period using k6's internal sleep function.
+ * This function serves as a 'think time' to simulate more realistic user behavior.
+ *
+ * @param minSeconds The minimum delay time in seconds.
+ * @param maxSeconds The maximum delay time in seconds (optional, defaults to minSeconds).
+ */
 export function delay(minSeconds: number, maxSeconds?: number): void {
   const effectiveMax = maxSeconds ?? minSeconds;
 
