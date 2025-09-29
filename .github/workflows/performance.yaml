@@ -52,12 +52,12 @@ jobs:
           -e K6_INFLUXDB_BUCKET=$INFLUXDB_BUCKET \
           custom-k6-influxdb-v2:latest run \
           --out xk6-influxdb=$INFLUXDB_URL \
+          --summary-export=/app/summary.json \
           /app/dist/${{ github.event.inputs.test_name }}.js
           
           echo "Files in current directory after k6 run:"
           ls -R
-
-
+          cat summary.json
       - name: Generate report
         if: always()
         run: node reporter/generate-report.ts
