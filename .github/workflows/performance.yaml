@@ -3,19 +3,19 @@ name: K6 Performance Test Runner
 on:
   push:
     branches:
-      - main
+      - main    
   workflow_dispatch:
     inputs:
       test_name:
-        description: "Select the specific performance test to run"
+        description: 'Select the specific performance test to run'
         required: true
         type: choice
         options:
           - load-test
           - stress-test
           - spike-test
-          - endurance-test
           - volume-test
+          - endurance-test
 
 jobs:
   run-selected-test:
