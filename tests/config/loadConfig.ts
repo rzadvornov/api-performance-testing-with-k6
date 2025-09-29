@@ -1,6 +1,6 @@
 import { calculateTotalMinutes } from "../../utilities/utils";
 import { TEST_CONFIG } from "./config";
-import { LoadTestConfig } from "./types/loadTestConfig";
+import { BaseTestConfig } from "./types/baseTestConfig";
 
 const SCENARIO_DEFINITIONS = {
   browseCatalog: {
@@ -35,7 +35,7 @@ const SCENARIO_DEFINITIONS = {
   },
 };
 
-export const LOAD_CONFIG: LoadTestConfig = {
+export const LOAD_CONFIG: BaseTestConfig = {
   stages: TEST_CONFIG.LOAD_TEST.stages,
   thresholds: TEST_CONFIG.LOAD_TEST.thresholds,
   duration: {

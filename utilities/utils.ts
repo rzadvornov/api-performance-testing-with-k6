@@ -1,6 +1,5 @@
 import { sleep } from "k6";
-import { WeightedScenario } from "../tests/config/types/weightedScenario";
-import { PhaseWeightConfig } from "../tests/config/types/phaseWeightConfig";
+import { PhaseWeightConfig, WeightedScenario } from "../tests/config/types/commonTypesConfig";
 
 const conversionFactors: { [key: string]: number } = {
   s: 1 / 60,
@@ -172,33 +171,6 @@ export function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function getRandomElement<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-export async function exponentialBackoff<T>(
-  operation: () => T,
-  maxRetries: number = 3,
-  initialDelay: number = 1000
-): Promise<T> {
-  let retries = 0;
-  let delay = initialDelay;
-
-  while (retries < maxRetries) {
-    try {
-      return operation();
-    } catch (error) {
-      retries++;
-      if (retries >= maxRetries) {
-        throw error;
-      }
-      await sleep(delay / 1000);
-      delay *= 2;
-    }
-  }
-  throw new Error("Max retries exceeded");
-}
-
 export function weightedRandom<T extends { weight: number }>(items: T[]): T {
   const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
   const random = Math.random() * totalWeight;
@@ -212,17 +184,6 @@ export function weightedRandom<T extends { weight: number }>(items: T[]): T {
   }
 
   return items[items.length - 1]; // Fallback
-}
-
-export function executeWithProbability(
-  probability: number,
-  callback: () => void
-): boolean {
-  if (Math.random() < probability) {
-    callback();
-    return true;
-  }
-  return false;
 }
 
 export function handleError(context: string, error: unknown) {

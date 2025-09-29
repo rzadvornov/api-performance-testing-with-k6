@@ -75,8 +75,8 @@ export const SPIKE_CONFIG: SpikeTestConfig = {
     spikeLoadMinutes: calculateMaximum(TEST_CONFIG.SPIKE_TEST.stages),
   },
   thinkTime: {
-    baselineMin: 1.0,
-    baselineMax: 3.0,
+    min: 1.0,
+    max: 3.0,
     spikeMin: 0.1,
     spikeMax: 0.4,
   },

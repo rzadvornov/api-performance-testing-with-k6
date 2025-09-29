@@ -3,9 +3,8 @@ import { FakeStoreAPI } from "../api/FakeStoreAPI";
 import { getRandomInt, delay, selectWeightedScenario } from "../utilities/utils";
 import { TEST_CONFIG, TEST_DATA } from "./config/config";
 import { STRESS_CONFIG } from "./config/stressConfig";
-import { TeardownData } from "./config/types/tearDownData";
-import { WeightedScenario } from "./config/types/weightedScenario";
 import http, { RefinedResponse } from "k6/http";
+import { TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
 
 type ValidScenarioName = Extract<keyof typeof STRESS_CONFIG.scenarios, string>;
 
@@ -42,6 +41,26 @@ const api = new FakeStoreAPI();
 let iterationCount = 0;
 let sessionStartTime = Date.now();
 
+export function setup(): TeardownData {
+  const constantLoadDuration = STRESS_CONFIG.duration.constantLoadMinutes;
+  
+  console.log("🔥 Starting Stress Test for Fake Store API");
+  console.log("📊 Test Configuration:");
+  console.log(
+    `   - Virtual Users: ${STRESS_CONFIG.stages
+      .map((s) => s.target)
+      .join(" → ")}`
+  );
+  console.log(
+    `   - Target Load Duration: ${constantLoadDuration} minutes (Max VUs)`
+  );
+  console.log("   - Testing system limits and potential breaking points");
+
+  return {
+    startTime: new Date().toISOString(),
+    expectedIterations: 0,
+  };
+}
 
 function rapidFireRequests() {
   for (let i = 0; i < 5; i++) {
@@ -191,27 +210,6 @@ function resourceExhaustion() {
   } catch (error) {
     console.log(`Resource exhaustion scenario error: ${error}`);
   }
-}
-
-export function setup(): TeardownData {
-  const constantLoadDuration = STRESS_CONFIG.duration.constantLoadMinutes;
-  
-  console.log("🔥 Starting Stress Test for Fake Store API");
-  console.log("📊 Test Configuration:");
-  console.log(
-    `   - Virtual Users: ${STRESS_CONFIG.stages
-      .map((s) => s.target)
-      .join(" → ")}`
-  );
-  console.log(
-    `   - Target Load Duration: ${constantLoadDuration} minutes (Max VUs)`
-  );
-  console.log("   - Testing system limits and potential breaking points");
-
-  return {
-    startTime: new Date().toISOString(),
-    expectedIterations: 0,
-  };
 }
 
 export default function () {

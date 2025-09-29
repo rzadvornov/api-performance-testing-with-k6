@@ -121,45 +121,9 @@ export const TEST_DATA = {
   NEW_CATEGORY: {
     name: "Test Category",
     image: "https://via.placeholder.com/640x480?text=Test+Category"
+  },
+
+  SEARCH: {
+    searchTerms: ["phone", "laptop", "shirt", "shoes", "book"]
   }
-};
-
-
-// User journey configuration for volume test
-export const USER_JOURNEY_CONFIG = {
-  THINK_TIME: { MIN: 1, MAX: 4 }, 
-  PRODUCT: { MIN_ID: 1, MAX_ID: 20 },
-  USER: { MIN_ID: 1, MAX_ID: 10 },
-  CART: { MIN_ID: 1, MAX_ID: 7 },
-  PROFILE_CHECK_PROBABILITY: 0.3, 
-  CART_VIEW_PROBABILITY: 0.2,     
-  USER_CART_PROBABILITY: 0.4,     
-  LIMITED_PRODUCTS_PROBABILITY: 0.5 
-};
-
-// Test options configurations
-export const loadTestOptions: Options = {
-  stages: [
-    { duration: '2m', target: 20 },   // Ramp up
-    { duration: '5m', target: 50 },   // Stay at 50 users
-    { duration: '2m', target: 20 },   // Ramp down
-    { duration: '1m', target: 0 },    // Cool down
-  ],
-  thresholds: {
-    http_req_duration: ['p(95)<500', 'p(99)<1000'], // Added p(99) for better tail latency monitoring
-    http_req_failed: ['rate<0.01'],
-    http_reqs: ['rate>100'],
-  },
-};
-
-export const volumeTestOptions: Options = {
-  stages: [
-    { duration: '2m', target: 50 },   // Ramp up
-    { duration: '30m', target: 50 },  // Extended duration
-    { duration: '2m', target: 0 },    // Ramp down
-  ],
-  thresholds: {
-    http_req_duration: ['p(95)<500'],
-    http_req_failed: ['rate<0.01'],
-  },
 };

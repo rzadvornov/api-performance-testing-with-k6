@@ -1,15 +1,13 @@
 import { Options } from "k6/options";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
 import { TEST_CONFIG, TEST_DATA } from "./config/config";
-import { TeardownData } from "./config/types/tearDownData";
 import {
   calculatePhaseSpecificWeight,
   delay,
   selectWeightedScenario,
 } from "../utilities/utils";
-import { WeightedScenario } from "./config/types/weightedScenario";
 import { SPIKE_CONFIG } from "./config/spikeConfig";
-import { PhaseWeightConfig } from "./config/types/phaseWeightConfig";
+import { PhaseWeightConfig, TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
 
 type ValidScenarioName = Extract<keyof typeof SPIKE_CONFIG.scenarios, string>;
 
@@ -61,6 +59,25 @@ const weightedScenarios: WeightedScenario[] = (Object.keys(SPIKE_CONFIG.scenario
 const api = new FakeStoreAPI();
 let iterationCount = 0;
 let sessionStartTime = Date.now();
+
+export function setup(): TeardownData {
+  console.log("⚡ Starting Spike Test for Fake Store API");
+  console.log("📊 Test Configuration:");
+  console.log(
+    `   - Virtual Users: ${TEST_CONFIG.SPIKE_TEST.stages
+      .map((s) => s.target)
+      .join(" → ")}`
+  );
+  console.log(
+    `   - Spike Duration: ${SPIKE_CONFIG.duration.spikeLoadMinutes} minutes`
+  );
+  console.log("   - Testing sudden traffic surge and recovery");
+
+  return {
+    startTime: new Date().toISOString(),
+    expectedIterations: 0,
+  };
+}
 
 function casualBrowsing(_runningTime: number) {
   api.products.getAllProducts(0, 10);
@@ -191,25 +208,6 @@ function apiHammering(_runningTime: number) {
   }
 }
 
-export function setup(): TeardownData {
-  console.log("⚡ Starting Spike Test for Fake Store API");
-  console.log("📊 Test Configuration:");
-  console.log(
-    `   - Virtual Users: ${TEST_CONFIG.SPIKE_TEST.stages
-      .map((s) => s.target)
-      .join(" → ")}`
-  );
-  console.log(
-    `   - Spike Duration: ${SPIKE_CONFIG.duration.spikeLoadMinutes} minutes`
-  );
-  console.log("   - Testing sudden traffic surge and recovery");
-
-  return {
-    startTime: new Date().toISOString(),
-    expectedIterations: 0,
-  };
-}
-
 export default function () {
   iterationCount++;
   const currentTime = Date.now();
@@ -232,11 +230,11 @@ export default function () {
 
   // Use adaptive think time based on the phase
   if (isSpikePeriod) {
-    delay(SPIKE_CONFIG.thinkTime.spikeMin, SPIKE_CONFIG.thinkTime.spikeMax);
+    delay(SPIKE_CONFIG.thinkTime.spikeMin!, SPIKE_CONFIG.thinkTime.spikeMax);
   } else {
     delay(
-      SPIKE_CONFIG.thinkTime.baselineMin,
-      SPIKE_CONFIG.thinkTime.baselineMax
+      SPIKE_CONFIG.thinkTime.min,
+      SPIKE_CONFIG.thinkTime.max
     );
   }
 }

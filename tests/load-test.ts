@@ -2,9 +2,8 @@ import { Options } from "k6/options";
 import { TEST_CONFIG, TEST_DATA } from "./config/config";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
 import { delay, getRandomInt, weightedRandom } from "../utilities/utils";
-import { TeardownData } from "./config/types/tearDownData";
-import { WeightedScenario } from "./config/types/weightedScenario";
 import { LOAD_CONFIG } from "./config/loadConfig";
+import { TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
 
 type ValidScenarioName = keyof typeof LOAD_CONFIG.scenarios;
 
@@ -41,6 +40,23 @@ export const options: Options = {
 const api = new FakeStoreAPI();
 let iterationCount = 0;
 let sessionStartTime = Date.now();
+
+export function setup(): TeardownData {
+  console.log("🚀 Starting Load Test for Fake Store API");
+  console.log("📊 Test Configuration:");
+  console.log(
+    `   - Virtual Users: ${LOAD_CONFIG.stages.map((s) => s.target).join(" → ")}`
+  );
+  console.log(
+    `   - Duration: ${LOAD_CONFIG.stages.map((s) => s.duration).join(" → ")}`
+  );
+  console.log("   - Expected load patterns under normal conditions");
+
+  return {
+    startTime: new Date().toISOString(),
+    expectedIterations: 0,
+  };
+}
 
 function browseCatalog(_runningTime: number) {
   api.products.getAllProducts(0, 20);
@@ -131,23 +147,6 @@ function authenticationFlow(_runningTime: number) {
     console.log(`Authentication flow error: ${error}`);
   }
   delay(0.2);
-}
-
-export function setup(): TeardownData {
-  console.log("🚀 Starting Load Test for Fake Store API");
-  console.log("📊 Test Configuration:");
-  console.log(
-    `   - Virtual Users: ${LOAD_CONFIG.stages.map((s) => s.target).join(" → ")}`
-  );
-  console.log(
-    `   - Duration: ${LOAD_CONFIG.stages.map((s) => s.duration).join(" → ")}`
-  );
-  console.log("   - Expected load patterns under normal conditions");
-
-  return {
-    startTime: new Date().toISOString(),
-    expectedIterations: 0,
-  };
 }
 
 export default function () {

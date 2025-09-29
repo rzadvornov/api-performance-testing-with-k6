@@ -1,8 +1,8 @@
 import { calculateTotalMinutes, calculateMaximum } from "../../utilities/utils";
 import { TEST_CONFIG } from "./config";
-import { EnduranceTestConfig } from "./types/enduranceTestConfig";
+import { BaseTestConfig } from "./types/baseTestConfig";
 
-export const ENDURANCE_CONFIG: EnduranceTestConfig = {
+export const ENDURANCE_CONFIG: BaseTestConfig = {
   stages: TEST_CONFIG.ENDURANCE_TEST.stages,
   thresholds: TEST_CONFIG.ENDURANCE_TEST.thresholds,
   duration: {
@@ -51,7 +51,7 @@ export const ENDURANCE_CONFIG: EnduranceTestConfig = {
     memoryStressPatterns: {
       // Base weight is 0. Dynamic weight is defined in the test file.
       weight: 0,
-      enabled: true, // Enabled so the function runs when dynamic weight is active
+      enabled: true,
       description: "Operations that might cause memory issues (dynamic after 20 min)",
     },
   },

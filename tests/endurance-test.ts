@@ -1,14 +1,13 @@
 import { Options } from "k6/options";
 import { FakeStoreAPI } from "../api/FakeStoreAPI";
 import { TEST_CONFIG, TEST_DATA } from "./config/config";
-import { TeardownData } from "./config/types/tearDownData";
 import {
   delay,
   getRandomInt,
   selectWeightedScenario,
 } from "../utilities/utils";
-import { WeightedScenario } from "./config/types/weightedScenario";
 import { ENDURANCE_CONFIG } from "./config/enduranceConfig";
+import { TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
 
 type ValidScenarioName = Extract<
   keyof typeof ENDURANCE_CONFIG.scenarios,

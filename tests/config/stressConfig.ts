@@ -1,10 +1,7 @@
 import { calculateTotalMinutes, calculateMaximum } from "../../utilities/utils";
 import { TEST_CONFIG } from "./config";
-import { StressTestConfig } from "./types/stressTestConfig";
+import { BaseTestConfig } from "./types/baseTestConfig";
 
-type ScenarioKey = keyof typeof SCENARIO_DEFINITIONS;
-
-// Define scenarios and their constant weights for sustained stress.
 const SCENARIO_DEFINITIONS = {
   rapidFireRequests: {
     weight: 20,
@@ -38,19 +35,15 @@ const SCENARIO_DEFINITIONS = {
   },
 };
 
-// Assuming TEST_CONFIG.STRESS_TEST exists in a file like ./config.ts
-// We'll calculate total minutes based on the stages defined there.
 const STRESS_TEST_STAGES = TEST_CONFIG.STRESS_TEST.stages;
 
-export const STRESS_CONFIG: StressTestConfig = {
+export const STRESS_CONFIG: BaseTestConfig = {
   stages: STRESS_TEST_STAGES,
   thresholds: TEST_CONFIG.STRESS_TEST.thresholds,
   duration: {
     totalMinutes: calculateTotalMinutes(STRESS_TEST_STAGES),
-    // Maximum VUs duration is the focus of a stress test's "constant load" phase
     constantLoadMinutes: calculateMaximum(STRESS_TEST_STAGES),
   },
-  // Aggressive, minimal think time to maximize concurrent requests
   thinkTime: {
     min: 0.1,
     max: 0.6,
