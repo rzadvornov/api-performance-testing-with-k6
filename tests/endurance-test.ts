@@ -8,6 +8,7 @@ import {
 } from "../utilities/utils";
 import { ENDURANCE_CONFIG } from "./config/enduranceConfig";
 import { TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
+export { handleSummary } from "../reporter/k6-summary";
 
 type ValidScenarioName = Extract<
   keyof typeof ENDURANCE_CONFIG.scenarios,

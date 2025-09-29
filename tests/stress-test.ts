@@ -5,6 +5,7 @@ import { TEST_CONFIG, TEST_DATA } from "./config/config";
 import { STRESS_CONFIG } from "./config/stressConfig";
 import http, { RefinedResponse } from "k6/http";
 import { TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
+export { handleSummary } from "../reporter/k6-summary";
 
 type ValidScenarioName = Extract<keyof typeof STRESS_CONFIG.scenarios, string>;
 

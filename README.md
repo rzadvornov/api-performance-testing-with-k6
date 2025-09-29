@@ -154,11 +154,7 @@ Results are saved to the `results/` directory:
 
 ```
 results/
-├── load-test-results.json
-├── stress-test-results.json  
-├── spike-test-results.json
-├── volume-test-results.json
-└── endurance-test-results.json
+├── summary.json
 ```
 
 ### Key Metrics to Monitor

@@ -8,6 +8,7 @@ import {
 } from "../utilities/utils";
 import { SPIKE_CONFIG } from "./config/spikeConfig";
 import { PhaseWeightConfig, TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
+export { handleSummary } from "../reporter/k6-summary";
 
 type ValidScenarioName = Extract<keyof typeof SPIKE_CONFIG.scenarios, string>;
 

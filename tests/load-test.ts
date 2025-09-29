@@ -4,6 +4,7 @@ import { FakeStoreAPI } from "../api/FakeStoreAPI";
 import { delay, getRandomInt, weightedRandom } from "../utilities/utils";
 import { LOAD_CONFIG } from "./config/loadConfig";
 import { TeardownData, WeightedScenario } from "./config/types/commonTypesConfig";
+export { handleSummary } from "../reporter/k6-summary";
 
 type ValidScenarioName = keyof typeof LOAD_CONFIG.scenarios;
 
