@@ -54,13 +54,14 @@ jobs:
           --out xk6-influxdb=$INFLUXDB_URL \
           --summary-export=/app/summary.json \
           /app/dist/${{ github.event.inputs.test_name }}.js
-          
+
+      - name: Generate report
+        if: always()
+        run: |
           echo "Files in current directory after k6 run:"
           ls -R
           cat summary.json
-      - name: Generate report
-        if: always()
-        run: node reporter/generate-report.ts
+          node reporter/generate-report.ts
 
       - name: Upload report as an artifact
         if: always()
