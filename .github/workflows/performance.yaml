@@ -55,7 +55,7 @@ jobs:
         if: always()
         run: |
           echo "Files in current directory after k6 run:"
-          ls -R
+          ls -la
           node reporter/generate-report.ts
 
       - name: Upload report as an artifact
