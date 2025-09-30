@@ -49,7 +49,6 @@ jobs:
           -e K6_INFLUXDB_BUCKET=$INFLUXDB_BUCKET \
           custom-k6-influxdb-v2:latest run \
           --out xk6-influxdb=$INFLUXDB_URL \
-          --summary-export=/app/summary2.json \
           /app/dist/${{ github.event.inputs.test_name }}.js
 
       - name: Generate report
@@ -57,8 +56,6 @@ jobs:
         run: |
           echo "Files in current directory after k6 run:"
           ls -R
-          echo "View summary2.json:"
-          cat summary2.json
           node reporter/generate-report.ts
 
       - name: Upload report as an artifact
