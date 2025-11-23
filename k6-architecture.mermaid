@@ -1,0 +1,77 @@
+graph TB
+    subgraph "Test Execution Layer"
+        TestRunner[k6 Test Runner]
+        ConfigManager[Test Configuration Manager]
+    end
+    
+    subgraph "Test Types"
+        LoadTest[Load Test]
+        StressTest[Stress Test]
+        SpikeTest[Spike Test]
+        VolumeTest[Volume Test]
+        EnduranceTest[Endurance Test]
+    end
+    
+    subgraph "API Client Layer"
+        ProductsAPI[Products API Client]
+        UsersAPI[Users API Client]
+        CategoriesAPI[Categories API Client]
+        AuthAPI[Auth API Client]
+    end
+    
+    subgraph "Target System"
+        APIEndpoints[REST API Endpoints]
+    end
+    
+    subgraph "Monitoring & Reporting"
+        Metrics[Performance Metrics Collector]
+        InfluxDB[InfluxDB Cloud]
+        Grafana[Grafana Cloud]
+        HTMLReport[HTML Report Generator]
+    end
+    
+    subgraph "CI/CD Integration"
+        GitHub[GitHub Actions]
+        Thresholds[Pass/Fail Thresholds]
+    end
+    
+    ConfigManager --> TestRunner
+    
+    TestRunner --> LoadTest
+    TestRunner --> StressTest
+    TestRunner --> SpikeTest
+    TestRunner --> VolumeTest
+    TestRunner --> EnduranceTest
+    
+    LoadTest --> ProductsAPI
+    LoadTest --> UsersAPI
+    LoadTest --> CategoriesAPI
+    LoadTest --> AuthAPI
+    
+    StressTest --> ProductsAPI
+    StressTest --> UsersAPI
+    
+    SpikeTest --> ProductsAPI
+    
+    VolumeTest --> CategoriesAPI
+    
+    EnduranceTest --> UsersAPI
+    
+    ProductsAPI --> APIEndpoints
+    UsersAPI --> APIEndpoints
+    CategoriesAPI --> APIEndpoints
+    AuthAPI --> APIEndpoints
+    
+    TestRunner --> Metrics
+    Metrics --> InfluxDB
+    Metrics --> HTMLReport
+    InfluxDB --> Grafana
+    
+    TestRunner --> GitHub
+    Metrics --> Thresholds
+    Thresholds --> GitHub
+    
+    style TestRunner fill:#4285f4
+    style Metrics fill:#34a853
+    style APIEndpoints fill:#ea4335
+    style GitHub fill:#fbbc04
